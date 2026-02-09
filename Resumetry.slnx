@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Resumetry.Domain/Resumetry.Domain.csproj" Id="ed2d429a-faf9-4d8d-9c45-666bbe12e23a" />
+  <Project Path="Resumetry.Application/Resumetry.Application.csproj" />
+  <Project Path="Resumetry.Infrastructure/Resumetry.Infrastructure.csproj" />
+  <Project Path="Resumetry.WPF/Resumetry.WPF.csproj" />
+</Solution>
