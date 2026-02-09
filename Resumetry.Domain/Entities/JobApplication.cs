@@ -8,16 +8,16 @@ namespace Resumetry.Domain.Entities
 {
     public class JobApplication : BaseEntity
     {
-        public required string Company { get; init; }
-        public required string Position { get; init; }
-        public required string Description { get; init; }
-        public required string Salary { get; init; }
-        public bool TopJob { get; init; }
-        public string? SourcePage { get; init; }
-        public string? ReviewPage { get; init; }
-        public string? LoginNotes { get; init; }
-        public Recruiter? Recruiter { get; init; }
-        public ICollection<ApplicationEvent> ApplicationEvents { get; init; } = [];
-        public ICollection<StatusItem> StatusItems { get; init; } = [];
+        public required string Company { get; set; }
+        public required string Position { get; set; }
+        public required string Description { get; set; }
+        public required string Salary { get; set; }
+        public bool TopJob { get; set; }
+        public string? SourcePage { get; set; }
+        public string? ReviewPage { get; set; }
+        public string? LoginNotes { get; set; }
+        public Recruiter? Recruiter { get; set; }
+        public ICollection<ApplicationEvent> ApplicationEvents { get; set; } = [];
+        public ICollection<StatusItem> StatusItems { get; set; } = [];
     }
 }

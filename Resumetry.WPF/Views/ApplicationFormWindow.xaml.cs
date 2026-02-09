@@ -7,31 +7,29 @@ namespace Resumetry.Views
     {
         private ApplicationFormViewModel ViewModel => (ApplicationFormViewModel)DataContext;
 
-        public ApplicationFormWindow()
+        public ApplicationFormWindow(ApplicationFormViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = new ApplicationFormViewModel();
+            DataContext = viewModel;
         }
 
-        private void CreateButton_Click(object sender, RoutedEventArgs e)
+        private async void CreateButton_Click(object sender, RoutedEventArgs e)
         {
             if (!ViewModel.Validate())
             {
-                MessageBox.Show("Please fill in all required fields (Company and Role).",
+                MessageBox.Show("Please fill in all required fields (Company, Role, Salary, and Description).",
                     "Validation Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
             }
 
-            // TODO: Save to database using repository
-            MessageBox.Show("Job application will be saved once repository integration is complete.",
-                "Success",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
-
-            DialogResult = true;
-            Close();
+            var success = await ViewModel.SaveAsync();
+            if (success)
+            {
+                DialogResult = true;
+                Close();
+            }
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)

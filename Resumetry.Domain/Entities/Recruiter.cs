@@ -4,9 +4,9 @@ namespace Resumetry.Domain.Entities
 {
     public class Recruiter : BaseEntity
     {
-        public required string Name { get; init; }
-        public string? Company { get; init; }
-        public string? Email { get; init; }
-        public string? Phone { get; init; }
+        public required string Name { get; set; }
+        public string? Company { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
     }
 }

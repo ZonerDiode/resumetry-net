@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Resumetry.Views"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
         mc:Ignorable="d"
-        Title="New Application" Height="900" Width="1100"
+        Title="{Binding WindowTitle}" Height="900" Width="1100"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
@@ -39,10 +39,10 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="New Application" Style="{StaticResource HeaderTextStyle}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding WindowTitle}" Style="{StaticResource HeaderTextStyle}"/>
 
                         <StackPanel Grid.Column="1" Orientation="Horizontal">
-                            <Button Content="Create"
+                            <Button Content="{Binding SaveButtonText}"
                                     Style="{StaticResource PrimaryButtonStyle}"
                                     Click="CreateButton_Click"
                                     Height="36"

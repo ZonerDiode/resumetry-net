@@ -122,16 +122,19 @@
                         BorderThickness="1"
                         CornerRadius="4">
                     <DataGrid ItemsSource="{Binding FilteredJobApplications}"
+                              SelectedItem="{Binding SelectedJobApplication}"
                               AutoGenerateColumns="False"
                               CanUserAddRows="False"
                               CanUserDeleteRows="False"
                               CanUserResizeRows="False"
+                              IsReadOnly="True"
                               HeadersVisibility="Column"
                               GridLinesVisibility="None"
                               SelectionMode="Single"
                               BorderThickness="0"
                               RowHeight="48"
-                              AlternatingRowBackground="#FAFAFA">
+                              AlternatingRowBackground="#FAFAFA"
+                              MouseDoubleClick="DataGrid_MouseDoubleClick">
 
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">

@@ -5,7 +5,7 @@ namespace Resumetry.Domain.Entities
 {
     public class StatusItem : BaseEntity
     {
-        public required DateTime Occurred { get; init; }
-        public required StatusEnum Status { get; init; }
+        public required DateTime Occurred { get; set; }
+        public required StatusEnum Status { get; set; }
     }
 }

@@ -8,6 +8,9 @@ namespace Resumetry.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<JobApplication> builder)
         {
+            builder.Property<Guid?>("Id")
+                .ValueGeneratedOnAdd(); 
+
             builder.HasKey(ja => ja.Id);
 
             builder.Property(ja => ja.Company)

@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Input;
 using Resumetry.ViewModels;
 
 namespace Resumetry
@@ -8,10 +9,20 @@ namespace Resumetry
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private MainViewModel ViewModel => (MainViewModel)DataContext;
+
+        public MainWindow(MainViewModel viewModel)
         {
             InitializeComponent();
-            DataContext = new MainViewModel();
+            DataContext = viewModel;
+        }
+
+        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (ViewModel.SelectedJobApplication != null)
+            {
+                ViewModel.OpenEditApplicationFormCommand.Execute(null);
+            }
         }
     }
 }
