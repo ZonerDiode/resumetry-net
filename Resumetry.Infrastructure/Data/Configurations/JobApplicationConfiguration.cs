@@ -21,11 +21,9 @@ namespace Resumetry.Infrastructure.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(200);
 
-            builder.Property(ja => ja.Description)
-                .IsRequired();
+            builder.Property(ja => ja.Description);
 
             builder.Property(ja => ja.Salary)
-                .IsRequired()
                 .HasMaxLength(100);
 
             builder.Property(ja => ja.TopJob)

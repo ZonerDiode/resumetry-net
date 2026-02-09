@@ -10,8 +10,8 @@ namespace Resumetry.Domain.Entities
     {
         public required string Company { get; set; }
         public required string Position { get; set; }
-        public required string Description { get; set; }
-        public required string Salary { get; set; }
+        public string? Description { get; set; }
+        public string? Salary { get; set; }
         public bool TopJob { get; set; }
         public string? SourcePage { get; set; }
         public string? ReviewPage { get; set; }

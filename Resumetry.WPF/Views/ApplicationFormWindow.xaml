@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Resumetry.Views"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="900" Width="1100"
+        Title="{Binding WindowTitle}" Height="1200" Width="1100"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
 
@@ -215,7 +215,7 @@
                         </Grid.ColumnDefinitions>
 
                         <!-- Status Section -->
-                        <Border Grid.Column="0" Background="White" CornerRadius="4" Padding="24">
+                        <Border Grid.Column="0" Background="White" CornerRadius="4" Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -310,7 +310,7 @@
                         </Border>
 
                         <!-- Notes Section -->
-                        <Border Grid.Column="2" Background="White" CornerRadius="4" Padding="24">
+                        <Border Grid.Column="2" Background="White" CornerRadius="4" Padding="12">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -501,7 +501,7 @@
                                 <TextBox Text="{Binding LoginHints, UpdateSourceTrigger=PropertyChanged}"
                                          TextWrapping="Wrap"
                                          AcceptsReturn="True"
-                                         Height="80"
+                                         Height="40"
                                          VerticalScrollBarVisibility="Auto"
                                          Style="{StaticResource ModernTextBoxStyle}">
                                     <TextBox.Resources>
@@ -529,47 +529,12 @@
                             <!-- Description -->
                             <StackPanel Grid.Row="4">
                                 <TextBlock Text="Description" Style="{StaticResource FormLabelStyle}"/>
-                                <TabControl Height="250" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-                                    <!-- View Tab -->
-                                    <TabItem Header="View">
-                                        <Border Background="White" Padding="0">
-                                            <Grid xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf">
-                                                <wv2:WebView2 x:Name="DescriptionWebView"
-                                                              CoreWebView2InitializationCompleted="DescriptionWebView_CoreWebView2InitializationCompleted"/>
-                                            </Grid>
-                                        </Border>
-                                    </TabItem>
-                                    <!-- Edit Tab -->
-                                    <TabItem Header="Edit">
-                                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                                 TextWrapping="Wrap"
-                                                 AcceptsReturn="True"
-                                                 VerticalScrollBarVisibility="Auto"
-                                                 HorizontalScrollBarVisibility="Auto"
-                                                 BorderThickness="0"
-                                                 Padding="8">
-                                            <TextBox.Resources>
-                                                <Style TargetType="TextBox">
-                                                    <Style.Triggers>
-                                                        <Trigger Property="Text" Value="">
-                                                            <Setter Property="Background">
-                                                                <Setter.Value>
-                                                                    <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
-                                                                        <VisualBrush.Visual>
-                                                                            <TextBlock Text="Paste or type the job description..."
-                                                                                       Foreground="#999"
-                                                                                       Margin="8,8,0,0"/>
-                                                                        </VisualBrush.Visual>
-                                                                    </VisualBrush>
-                                                                </Setter.Value>
-                                                            </Setter>
-                                                        </Trigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </TextBox.Resources>
-                                        </TextBox>
-                                    </TabItem>
-                                </TabControl>
+                                <Border Height="250" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                    <Grid xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf">
+                                        <wv2:WebView2 x:Name="DescriptionWebView"
+                                                      CoreWebView2InitializationCompleted="DescriptionWebView_CoreWebView2InitializationCompleted"/>
+                                    </Grid>
+                                </Border>
                             </StackPanel>
                         </Grid>
                     </Border>

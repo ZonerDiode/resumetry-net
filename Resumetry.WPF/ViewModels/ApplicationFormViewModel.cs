@@ -205,8 +205,8 @@ namespace Resumetry.ViewModels
             _existingId = jobApplication.Id;
             Company = jobApplication.Company;
             Role = jobApplication.Position;
-            Salary = jobApplication.Salary;
-            Description = jobApplication.Description;
+            Salary = jobApplication.Salary ?? string.Empty;
+            Description = jobApplication.Description ?? string.Empty;
             MarkAsTopJob = jobApplication.TopJob;
             SourcePageUrl = jobApplication.SourcePage ?? string.Empty;
             ReviewPageUrl = jobApplication.ReviewPage ?? string.Empty;
@@ -260,9 +260,7 @@ namespace Resumetry.ViewModels
         public bool Validate()
         {
             return !string.IsNullOrWhiteSpace(Company) &&
-                   !string.IsNullOrWhiteSpace(Role) &&
-                   !string.IsNullOrWhiteSpace(Salary) &&
-                   !string.IsNullOrWhiteSpace(Description);
+                   !string.IsNullOrWhiteSpace(Role);
         }
 
         public async Task<bool> SaveAsync()
@@ -285,8 +283,8 @@ namespace Resumetry.ViewModels
                     // Update scalar properties
                     existingJobApp.Company = Company;
                     existingJobApp.Position = Role;
-                    existingJobApp.Description = Description;
-                    existingJobApp.Salary = Salary;
+                    existingJobApp.Description = string.IsNullOrWhiteSpace(Description) ? null : Description;
+                    existingJobApp.Salary = string.IsNullOrWhiteSpace(Salary) ? null : Salary;
                     existingJobApp.TopJob = MarkAsTopJob;
                     existingJobApp.SourcePage = string.IsNullOrWhiteSpace(SourcePageUrl) ? null : SourcePageUrl;
                     existingJobApp.ReviewPage = string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl;
@@ -444,8 +442,8 @@ namespace Resumetry.ViewModels
                     {
                         Company = Company,
                         Position = Role,
-                        Description = Description,
-                        Salary = Salary,
+                        Description = string.IsNullOrWhiteSpace(Description) ? null : Description,
+                        Salary = string.IsNullOrWhiteSpace(Salary) ? null : Salary,
                         TopJob = MarkAsTopJob,
                         SourcePage = string.IsNullOrWhiteSpace(SourcePageUrl) ? null : SourcePageUrl,
                         ReviewPage = string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl,
