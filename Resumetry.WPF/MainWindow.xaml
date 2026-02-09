@@ -163,11 +163,18 @@
                                         <ControlTemplate TargetType="DataGridCell">
                                             <Border Padding="{TemplateBinding Padding}"
                                                     Background="{TemplateBinding Background}">
-                                                <ContentPresenter VerticalAlignment="Center"/>
+                                                <ContentPresenter VerticalAlignment="Center"
+                                                                  TextElement.Foreground="{TemplateBinding Foreground}"/>
                                             </Border>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </Trigger>
+                                </Style.Triggers>
                             </Style>
                         </DataGrid.CellStyle>
 
@@ -206,7 +213,6 @@
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="FontSize" Value="14"/>
-                                        <Setter Property="Foreground" Value="#546E7A"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
@@ -242,7 +248,7 @@
                                         <Border Background="{Binding CurrentStatus, Converter={StaticResource StatusToBrushConverter}}"
                                                 CornerRadius="4"
                                                 Padding="12,4"
-                                                HorizontalAlignment="Center">
+                                                HorizontalAlignment="Center" Width="90">
                                             <TextBlock Text="{Binding CurrentStatusText}"
                                                        Foreground="White"
                                                        FontWeight="Bold"
