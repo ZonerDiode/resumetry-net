@@ -108,6 +108,11 @@
                                 Command="{Binding NewApplicationCommand}"
                                 Height="36"
                                 Margin="0,0,8,0"/>
+                        <Button Content="Delete"
+                                Style="{StaticResource DangerButtonStyle}"
+                                Command="{Binding DeleteApplicationCommand}"
+                                Height="36"
+                                Margin="0,0,8,0"/>
                         <Button Content="Reports"
                                 Style="{StaticResource PrimaryButtonStyle}"
                                 Command="{Binding ReportsCommand}"

@@ -24,6 +24,7 @@ namespace Resumetry.ViewModels
 
             NewApplicationCommand = new RelayCommand(_ => OpenNewApplicationForm());
             OpenEditApplicationFormCommand = new RelayCommand(_ => OpenEditApplicationForm(), _ => SelectedJobApplication != null);
+            DeleteApplicationCommand = new RelayCommand(_ => DeleteApplication(), _ => SelectedJobApplication != null);
             ReportsCommand = new RelayCommand(_ => OpenReports());
             RefreshCommand = new RelayCommand(async _ => await LoadJobApplicationsAsync());
 
@@ -59,6 +60,7 @@ namespace Resumetry.ViewModels
 
         public ICommand NewApplicationCommand { get; }
         public ICommand OpenEditApplicationFormCommand { get; }
+        public ICommand DeleteApplicationCommand { get; }
         public ICommand ReportsCommand { get; }
         public ICommand RefreshCommand { get; }
 
@@ -145,6 +147,47 @@ namespace Resumetry.ViewModels
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show($"Error loading job application: {ex.Message}",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            }
+        }
+
+        private async void DeleteApplication()
+        {
+            if (SelectedJobApplication == null || !SelectedJobApplication.Id.HasValue) return;
+
+            var result = System.Windows.MessageBox.Show(
+                $"Are you sure you want to delete the application for {SelectedJobApplication.Company} - {SelectedJobApplication.Position}?\n\nThis action cannot be undone.",
+                "Confirm Delete",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            if (result != System.Windows.MessageBoxResult.Yes) return;
+
+            try
+            {
+                // Load the full job application
+                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id.Value);
+                if (jobApplication == null)
+                {
+                    System.Windows.MessageBox.Show("Job application not found.",
+                        "Error",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error);
+                    return;
+                }
+
+                // Delete the job application
+                _unitOfWork.JobApplications.Delete(jobApplication);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Refresh the list
+                await LoadJobApplicationsAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Error deleting job application: {ex.Message}",
                     "Error",
                     System.Windows.MessageBoxButton.OK,
                     System.Windows.MessageBoxImage.Error);
