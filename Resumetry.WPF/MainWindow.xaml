@@ -138,7 +138,7 @@
                               GridLinesVisibility="None"
                               SelectionMode="Single"
                               BorderThickness="0"
-                              RowHeight="48"
+                              RowHeight="35"
                               AlternatingRowBackground="#FAFAFA"
                               MouseDoubleClick="DataGrid_MouseDoubleClick">
 
@@ -157,7 +157,7 @@
                         <DataGrid.CellStyle>
                             <Style TargetType="DataGridCell">
                                 <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="12,0"/>
+                                <Setter Property="Padding" Value="10,0"/>
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="DataGridCell">
