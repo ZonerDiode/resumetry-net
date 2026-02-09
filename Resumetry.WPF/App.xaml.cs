@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Resumetry.Application.Interfaces;
+using Resumetry.Application.Services;
 using Resumetry.Infrastructure.Data;
 using Resumetry.Infrastructure.Data.Repositories;
 using Resumetry.ViewModels;
@@ -43,9 +44,13 @@ namespace Resumetry
             services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            // Register services
+            services.AddScoped<IImportService, ImportService>();
+
             // Register ViewModels
             services.AddTransient<MainViewModel>();
             services.AddTransient<ApplicationFormViewModel>();
+            services.AddTransient<SettingsViewModel>();
 
             // Register Windows
             services.AddTransient<MainWindow>();

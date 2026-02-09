@@ -56,17 +56,18 @@
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- View Mode Buttons -->
                         <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0">
+                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0" ToolTip="Settings"
+                                    Command="{Binding OpenSettingsCommand}">
                                 <Path Data="M3,3 h7 v7 h-7 z M13,3 h7 v7 h-7 z M3,13 h7 v7 h-7 z M13,13 h7 v7 h-7 z"
                                       Fill="{StaticResource PrimaryBlueBrush}"
                                       Stretch="Uniform" Width="16" Height="16"/>
                             </Button>
-                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0">
+                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0" ToolTip="List View">
                                 <Path Data="M0,0 h20 v4 h-20 z M0,8 h20 v4 h-20 z M0,16 h20 v4 h-20 z"
                                       Fill="{StaticResource MediumTextBrush}"
                                       Stretch="Uniform" Width="16" Height="16"/>
                             </Button>
-                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36">
+                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" ToolTip="Recruiter View">
                                 <Path Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
                                       Fill="{StaticResource MediumTextBrush}"
                                       Stretch="Uniform" Width="16" Height="16"/>

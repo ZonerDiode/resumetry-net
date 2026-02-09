@@ -7,7 +7,8 @@
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="900" Width="1100"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -528,32 +529,47 @@
                             <!-- Description -->
                             <StackPanel Grid.Row="4">
                                 <TextBlock Text="Description" Style="{StaticResource FormLabelStyle}"/>
-                                <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                         TextWrapping="Wrap"
-                                         AcceptsReturn="True"
-                                         Height="100"
-                                         VerticalScrollBarVisibility="Auto"
-                                         Style="{StaticResource ModernTextBoxStyle}">
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                            <Style.Triggers>
-                                                <Trigger Property="Text" Value="">
-                                                    <Setter Property="Background">
-                                                        <Setter.Value>
-                                                            <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
-                                                                <VisualBrush.Visual>
-                                                                    <TextBlock Text="Paste or type the job description..."
-                                                                               Foreground="#999"
-                                                                               Margin="8,8,0,0"/>
-                                                                </VisualBrush.Visual>
-                                                            </VisualBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
+                                <TabControl Height="250" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                                    <!-- View Tab -->
+                                    <TabItem Header="View">
+                                        <Border Background="White" Padding="0">
+                                            <Grid xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf">
+                                                <wv2:WebView2 x:Name="DescriptionWebView"
+                                                              CoreWebView2InitializationCompleted="DescriptionWebView_CoreWebView2InitializationCompleted"/>
+                                            </Grid>
+                                        </Border>
+                                    </TabItem>
+                                    <!-- Edit Tab -->
+                                    <TabItem Header="Edit">
+                                        <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                 TextWrapping="Wrap"
+                                                 AcceptsReturn="True"
+                                                 VerticalScrollBarVisibility="Auto"
+                                                 HorizontalScrollBarVisibility="Auto"
+                                                 BorderThickness="0"
+                                                 Padding="8">
+                                            <TextBox.Resources>
+                                                <Style TargetType="TextBox">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="Text" Value="">
+                                                            <Setter Property="Background">
+                                                                <Setter.Value>
+                                                                    <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
+                                                                        <VisualBrush.Visual>
+                                                                            <TextBlock Text="Paste or type the job description..."
+                                                                                       Foreground="#999"
+                                                                                       Margin="8,8,0,0"/>
+                                                                        </VisualBrush.Visual>
+                                                                    </VisualBrush>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBox.Resources>
+                                        </TextBox>
+                                    </TabItem>
+                                </TabControl>
                             </StackPanel>
                         </Grid>
                     </Border>

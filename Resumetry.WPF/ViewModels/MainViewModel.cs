@@ -27,6 +27,7 @@ namespace Resumetry.ViewModels
             DeleteApplicationCommand = new RelayCommand(_ => DeleteApplication(), _ => SelectedJobApplication != null);
             ReportsCommand = new RelayCommand(_ => OpenReports());
             RefreshCommand = new RelayCommand(async _ => await LoadJobApplicationsAsync());
+            OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
 
             // Load initial data
             _ = LoadJobApplicationsAsync();
@@ -63,6 +64,7 @@ namespace Resumetry.ViewModels
         public ICommand DeleteApplicationCommand { get; }
         public ICommand ReportsCommand { get; }
         public ICommand RefreshCommand { get; }
+        public ICommand OpenSettingsCommand { get; }
 
         private async Task LoadJobApplicationsAsync()
         {
@@ -199,6 +201,16 @@ namespace Resumetry.ViewModels
             // TODO: Implement reports functionality
             System.Windows.MessageBox.Show("Reports functionality coming soon!", "Reports",
                 System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+        }
+
+        private void OpenSettings()
+        {
+            var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
+            var settingsWindow = new SettingsWindow(settingsViewModel);
+            settingsWindow.ShowDialog();
+
+            // Refresh the list after closing settings (in case data was imported)
+            _ = LoadJobApplicationsAsync();
         }
     }
 }
