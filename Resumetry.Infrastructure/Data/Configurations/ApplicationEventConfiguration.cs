@@ -10,7 +10,7 @@ namespace Resumetry.Infrastructure.Data.Configurations
         {
             builder.HasKey(ae => ae.Id);
 
-            builder.Property(ae => ae.Date)
+            builder.Property(ae => ae.Occurred)
                 .IsRequired();
 
             builder.Property(ae => ae.Description)
