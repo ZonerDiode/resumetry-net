@@ -19,8 +19,8 @@ namespace Resumetry.ViewModels
         {
             _serviceProvider = serviceProvider;
             _unitOfWork = unitOfWork;
-            _jobApplications = new ObservableCollection<JobApplicationViewModel>();
-            _filteredJobApplications = new ObservableCollection<JobApplicationViewModel>();
+            _jobApplications = [];
+            _filteredJobApplications = [];
 
             NewApplicationCommand = new RelayCommand(_ => OpenNewApplicationForm());
             OpenEditApplicationFormCommand = new RelayCommand(_ => OpenEditApplicationForm(), _ => SelectedJobApplication != null);
