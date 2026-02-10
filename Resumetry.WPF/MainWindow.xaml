@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Resumetry"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
-        xmlns:converters="clr-namespace:Resumetry.Converters"
+        xmlns:converters="clr-namespace:Resumetry.Converters" 
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
         Title="Resumetry" Height="768" Width="1280"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen" Icon="/favicon.ico">
 
     <Window.Resources>
         <converters:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
@@ -28,7 +29,7 @@
 
         <!-- Main Content -->
         <Grid Grid.Row="1" Background="{StaticResource LightGrayBrush}">
-            <Grid Margin="32,24">
+            <Grid Margin="12,12">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -55,7 +56,7 @@
                     <!-- Controls on the Right -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
                         <!-- View Mode Buttons -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,4,0">
                             <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0" ToolTip="Settings"
                                     Command="{Binding OpenSettingsCommand}">
                                 <Path Data="M3,3 h7 v7 h-7 z M13,3 h7 v7 h-7 z M3,13 h7 v7 h-7 z M13,13 h7 v7 h-7 z"
@@ -137,7 +138,7 @@
                               HeadersVisibility="Column"
                               GridLinesVisibility="None"
                               SelectionMode="Single"
-                              BorderThickness="0"
+                              BorderThickness="1"
                               RowHeight="35"
                               AlternatingRowBackground="#FAFAFA"
                               MouseDoubleClick="DataGrid_MouseDoubleClick">

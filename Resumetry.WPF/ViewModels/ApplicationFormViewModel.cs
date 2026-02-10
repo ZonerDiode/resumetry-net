@@ -77,8 +77,8 @@ namespace Resumetry.ViewModels
         public ApplicationFormViewModel(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            StatusItems = new ObservableCollection<StatusItemViewModel>();
-            ApplicationEvents = new ObservableCollection<ApplicationEventViewModel>();
+            StatusItems = [];
+            ApplicationEvents = [];
 
             AddStatusCommand = new RelayCommand(_ => AddStatus());
             RemoveStatusCommand = new RelayCommand(item => RemoveStatus(item as StatusItemViewModel));
@@ -172,7 +172,7 @@ namespace Resumetry.ViewModels
 
         private void AddStatus()
         {
-            StatusItems.Add(new StatusItemViewModel { Occurred = CreatedAt });
+            StatusItems.Add(new StatusItemViewModel { Occurred = DateTime.Now });
             OnPropertyChanged(nameof(StatusCount));
         }
 

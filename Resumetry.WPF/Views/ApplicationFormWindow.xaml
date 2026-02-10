@@ -5,11 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Resumetry.Views"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
+        xmlns:converters="clr-namespace:Resumetry.Converters" 
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="1200" Width="1100"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
-
+    
+    <Window.Resources>
+        <converters:IndexPlusOneConverter x:Key="IndexPlusOneConverter"/>
+    </Window.Resources>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -209,7 +214,7 @@
                     <!-- Status and Notes Side by Side -->
                     <Grid Grid.Row="2" Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="320"/>
                             <ColumnDefinition Width="16"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
@@ -223,7 +228,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Header with Add Button -->
-                                <Grid Grid.Row="0" Margin="0,0,0,16">
+                                <Grid Grid.Row="0" Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
@@ -244,12 +249,12 @@
                                 </Grid>
 
                                 <!-- Status Items -->
-                                <ItemsControl Grid.Row="1" ItemsSource="{Binding StatusItems}">
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding StatusItems}" AlternationCount="100">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border Background="{StaticResource LightGrayBrush}"
                                                     CornerRadius="4"
-                                                    Padding="16"
+                                                    Padding="8"
                                                     Margin="0,0,0,12">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
@@ -258,16 +263,19 @@
                                                     </Grid.RowDefinitions>
 
                                                     <!-- Header -->
-                                                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                                                    <Grid Grid.Row="0" Margin="0,0,0,4">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
+                                                        <!-- Use AlternationIndex (zero-based). Use converter to display 1-based -->
                                                         <TextBlock Grid.Column="0"
-                                                                   Text="Status"
                                                                    FontWeight="SemiBold"
-                                                                   FontSize="14"/>
+                                                                   FontSize="14">
+                                                            <Run Text="Status "/>
+                                                            <Run Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay, Converter={StaticResource IndexPlusOneConverter}}"/>
+                                                        </TextBlock>
 
                                                         <Button Grid.Column="1"
                                                                 Content="Remove"
@@ -318,7 +326,7 @@
                                 </Grid.RowDefinitions>
 
                                 <!-- Header with Add Button -->
-                                <Grid Grid.Row="0" Margin="0,0,0,16">
+                                <Grid Grid.Row="0" Margin="0,0,0,12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
@@ -339,12 +347,12 @@
                                 </Grid>
 
                                 <!-- Notes Items -->
-                                <ItemsControl Grid.Row="1" ItemsSource="{Binding ApplicationEvents}">
+                                <ItemsControl Grid.Row="1" ItemsSource="{Binding ApplicationEvents}" AlternationCount="100">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <Border Background="{StaticResource LightGrayBrush}"
                                                     CornerRadius="4"
-                                                    Padding="16"
+                                                    Padding="8"
                                                     Margin="0,0,0,12">
                                                 <Grid>
                                                     <Grid.RowDefinitions>
@@ -354,16 +362,18 @@
                                                     </Grid.RowDefinitions>
 
                                                     <!-- Header -->
-                                                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                                                    <Grid Grid.Row="0" Margin="0,0,0,4">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="*"/>
                                                             <ColumnDefinition Width="Auto"/>
                                                         </Grid.ColumnDefinitions>
 
                                                         <TextBlock Grid.Column="0"
-                                                                   Text="Note"
                                                                    FontWeight="SemiBold"
-                                                                   FontSize="14"/>
+                                                                   FontSize="14">
+                                                            <Run Text="Note "/>
+                                                            <Run Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay, Converter={StaticResource IndexPlusOneConverter}}"/>
+                                                        </TextBlock>
 
                                                         <Button Grid.Column="1"
                                                                 Content="Remove"

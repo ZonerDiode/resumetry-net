@@ -99,8 +99,7 @@ namespace Resumetry.ViewModels
             var filtered = string.IsNullOrWhiteSpace(FilterText)
                 ? _jobApplications
                 : _jobApplications.Where(ja =>
-                    ja.Company.Contains(FilterText, StringComparison.OrdinalIgnoreCase) ||
-                    ja.Position.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
+                    ja.Company.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
 
             foreach (var item in filtered)
             {
