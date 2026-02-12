@@ -16,7 +16,7 @@ namespace Resumetry.ViewModels
             _importService = importService;
             _unitOfWork = unitOfWork;
 
-            ImportFromJsonCommand = new RelayCommand(async _ => await ImportFromJsonAsync());
+            ImportFromJsonCommand = new AsyncRelayCommand(ImportFromJsonAsync);
             ExportToJsonCommand = new RelayCommand(_ => ExportToJson(), _ => false); // Disabled for now
         }
 

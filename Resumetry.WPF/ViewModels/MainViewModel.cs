@@ -23,14 +23,20 @@ namespace Resumetry.ViewModels
             _filteredJobApplications = [];
 
             NewApplicationCommand = new RelayCommand(_ => OpenNewApplicationForm());
-            OpenEditApplicationFormCommand = new RelayCommand(_ => OpenEditApplicationForm(), _ => SelectedJobApplication != null);
-            DeleteApplicationCommand = new RelayCommand(_ => DeleteApplication(), _ => SelectedJobApplication != null);
+            OpenEditApplicationFormCommand = new AsyncRelayCommand(OpenEditApplicationFormAsync, () => SelectedJobApplication != null);
+            DeleteApplicationCommand = new AsyncRelayCommand(DeleteApplicationAsync, () => SelectedJobApplication != null);
             ReportsCommand = new RelayCommand(_ => OpenReports());
-            RefreshCommand = new RelayCommand(async _ => await LoadJobApplicationsAsync());
+            RefreshCommand = new AsyncRelayCommand(LoadJobApplicationsAsync);
             OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
 
             // Load initial data
-            _ = LoadJobApplicationsAsync();
+            ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
+            {
+                System.Windows.MessageBox.Show($"Error loading initial data: {ex.Message}",
+                    "Startup Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            });
         }
 
         public ObservableCollection<JobApplicationViewModel> FilteredJobApplications
@@ -114,11 +120,17 @@ namespace Resumetry.ViewModels
             if (formWindow.ShowDialog() == true)
             {
                 // Refresh the list after adding
-                _ = LoadJobApplicationsAsync();
+                ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
+                {
+                    System.Windows.MessageBox.Show($"Error refreshing data: {ex.Message}",
+                        "Error",
+                        System.Windows.MessageBoxButton.OK,
+                        System.Windows.MessageBoxImage.Error);
+                });
             }
         }
 
-        private async void OpenEditApplicationForm()
+        private async Task OpenEditApplicationFormAsync()
         {
             if (SelectedJobApplication == null) return;
 
@@ -154,7 +166,7 @@ namespace Resumetry.ViewModels
             }
         }
 
-        private async void DeleteApplication()
+        private async Task DeleteApplicationAsync()
         {
             if (SelectedJobApplication == null) return;
 
@@ -204,7 +216,13 @@ namespace Resumetry.ViewModels
             settingsWindow.ShowDialog();
 
             // Refresh the list after closing settings (in case data was imported)
-            _ = LoadJobApplicationsAsync();
+            ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
+            {
+                System.Windows.MessageBox.Show($"Error refreshing data: {ex.Message}",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+            });
         }
     }
 }

@@ -3,5 +3,6 @@
   <Project Path="Resumetry.Application/Resumetry.Application.csproj" />
   <Project Path="Resumetry.Application.Tests/Resumetry.Application.Tests.csproj" />
   <Project Path="Resumetry.Infrastructure/Resumetry.Infrastructure.csproj" />
+  <Project Path="Resumetry.WPF.Tests/Resumetry.WPF.Tests.csproj" />
   <Project Path="Resumetry.WPF/Resumetry.WPF.csproj" />
 </Solution>
