@@ -1,4 +1,4 @@
-using Resumetry.Application.Interfaces;
+using Resumetry.Domain.Interfaces;
 using Resumetry.Infrastructure.Data.Repositories;
 
 namespace Resumetry.Infrastructure.Data

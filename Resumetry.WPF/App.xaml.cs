@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Resumetry.Application.Interfaces;
 using Resumetry.Application.Services;
+using Resumetry.Domain.Interfaces;
 using Resumetry.Infrastructure.Data;
 using Resumetry.Infrastructure.Data.Repositories;
 using Resumetry.ViewModels;

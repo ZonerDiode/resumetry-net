@@ -1,6 +1,7 @@
 using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Entities;
+using Resumetry.Domain.Interfaces;
 
 namespace Resumetry.Application.Services;
 
@@ -12,7 +13,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     /// <inheritdoc />
-    public async Task<Guid> CreateAsync(CreateJobApplicationDto dto, CancellationToken cancellationToken = default)
+    public async Task<Guid> CreateAsync(JobApplicationCreateDto dto, CancellationToken cancellationToken = default)
     {
         // Validate
         ValidateDto(dto.Company, dto.Position);
@@ -77,7 +78,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
     }
 
     /// <inheritdoc />
-    public async Task UpdateAsync(UpdateJobApplicationDto dto, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(JobApplicationUpdateDto dto, CancellationToken cancellationToken = default)
     {
         // Validate
         ValidateDto(dto.Company, dto.Position);
@@ -221,6 +222,93 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
                 });
             }
         }
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<JobApplicationSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var entities = await _unitOfWork.JobApplications.GetAllAsync(cancellationToken);
+
+        return entities.Select(entity =>
+        {
+            // Compute current status from latest StatusItem
+            var latestStatusItem = entity.StatusItems
+                .OrderByDescending(s => s.Occurred)
+                .FirstOrDefault();
+            var currentStatus = latestStatusItem?.Status;
+            var currentStatusText = currentStatus?.ToString() ?? "UNKNOWN";
+
+            // Compute applied date from first APPLIED StatusItem, fallback to CreatedAt
+            var appliedStatusItem = entity.StatusItems
+                .Where(s => s.Status == Domain.Enums.StatusEnum.Applied)
+                .OrderBy(s => s.Occurred)
+                .FirstOrDefault();
+            var appliedDate = appliedStatusItem?.Occurred ?? entity.CreatedAt;
+
+            return new JobApplicationSummaryDto(
+                Id: entity.Id,
+                Company: entity.Company,
+                Position: entity.Position,
+                Salary: entity.Salary,
+                TopJob: entity.TopJob,
+                CreatedAt: entity.CreatedAt,
+                CurrentStatus: currentStatus,
+                CurrentStatusText: currentStatusText,
+                AppliedDate: appliedDate
+            );
+        }).ToList();
+    }
+
+    /// <inheritdoc />
+    public async Task<JobApplicationDetailDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var entity = await _unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken);
+        if (entity is null)
+        {
+            return null;
+        }
+
+        return new JobApplicationDetailDto(
+            Id: entity.Id,
+            Company: entity.Company,
+            Position: entity.Position,
+            Description: entity.Description,
+            Salary: entity.Salary,
+            TopJob: entity.TopJob,
+            SourcePage: entity.SourcePage,
+            ReviewPage: entity.ReviewPage,
+            LoginNotes: entity.LoginNotes,
+            CreatedAt: entity.CreatedAt,
+            Recruiter: entity.Recruiter is null ? null : new RecruiterDto(
+                Name: entity.Recruiter.Name,
+                Company: entity.Recruiter.Company,
+                Email: entity.Recruiter.Email,
+                Phone: entity.Recruiter.Phone
+            ),
+            StatusItems: entity.StatusItems.Select(s => new StatusItemDto(
+                Occurred: s.Occurred,
+                Status: s.Status,
+                Id: s.Id
+            )).ToList(),
+            ApplicationEvents: entity.ApplicationEvents.Select(e => new ApplicationEventDto(
+                Occurred: e.Occurred,
+                Description: e.Description,
+                Id: e.Id
+            )).ToList()
+        );
+    }
+
+    /// <inheritdoc />
+    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var entity = await _unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken);
+        if (entity is null)
+        {
+            throw new KeyNotFoundException($"Job application with ID {id} not found.");
+        }
+
+        _unitOfWork.JobApplications.Delete(entity);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private static void ValidateDto(string company, string position)

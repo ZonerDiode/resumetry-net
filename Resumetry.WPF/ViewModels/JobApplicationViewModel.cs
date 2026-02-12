@@ -1,47 +1,25 @@
-using Resumetry.Domain.Entities;
+using Resumetry.Application.DTOs;
 using Resumetry.Domain.Enums;
 
 namespace Resumetry.ViewModels
 {
     public class JobApplicationViewModel : ViewModelBase
     {
-        private readonly JobApplication _jobApplication;
+        private readonly JobApplicationSummaryDto _dto;
 
-        public JobApplicationViewModel(JobApplication jobApplication)
+        public JobApplicationViewModel(JobApplicationSummaryDto dto)
         {
-            _jobApplication = jobApplication;
+            _dto = dto;
         }
 
-        public Guid Id => _jobApplication.Id;
-        public string Company => _jobApplication.Company;
-        public string Position => _jobApplication.Position;
-        public string? Salary => _jobApplication.Salary;
-        public bool TopJob => _jobApplication.TopJob;
-        public DateTime CreatedAt => _jobApplication.CreatedAt;
-
-        public StatusEnum? CurrentStatus
-        {
-            get
-            {
-                var latestStatus = _jobApplication.StatusItems
-                    .OrderByDescending(s => s.Occurred)
-                    .FirstOrDefault();
-                return latestStatus?.Status;
-            }
-        }
-
-        public string CurrentStatusText => CurrentStatus?.ToString() ?? "UNKNOWN";
-
-        public DateTime? AppliedDate
-        {
-            get
-            {
-                var appliedStatus = _jobApplication.StatusItems
-                    .Where(s => s.Status == StatusEnum.Applied)
-                    .OrderBy(s => s.Occurred)
-                    .FirstOrDefault();
-                return appliedStatus?.Occurred ?? _jobApplication.CreatedAt;
-            }
-        }
+        public Guid Id => _dto.Id;
+        public string Company => _dto.Company;
+        public string Position => _dto.Position;
+        public string? Salary => _dto.Salary;
+        public bool TopJob => _dto.TopJob;
+        public DateTime CreatedAt => _dto.CreatedAt;
+        public StatusEnum? CurrentStatus => _dto.CurrentStatus;
+        public string CurrentStatusText => _dto.CurrentStatusText;
+        public DateTime? AppliedDate => _dto.AppliedDate;
     }
 }

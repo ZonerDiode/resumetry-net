@@ -1,4 +1,4 @@
-namespace Resumetry.Application.Interfaces
+namespace Resumetry.Domain.Interfaces
 {
     public interface IUnitOfWork
     {

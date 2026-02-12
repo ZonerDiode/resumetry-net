@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
-using Resumetry.Domain.Entities;
 using Resumetry.Domain.Enums;
 
 namespace Resumetry.ViewModels
@@ -199,35 +198,35 @@ namespace Resumetry.ViewModels
             }
         }
 
-        public void LoadExistingJobApplication(JobApplication jobApplication)
+        public void LoadExistingJobApplication(JobApplicationDetailDto detailDto)
         {
-            _existingId = jobApplication.Id;
-            Company = jobApplication.Company;
-            Role = jobApplication.Position;
-            Salary = jobApplication.Salary ?? string.Empty;
-            Description = jobApplication.Description ?? string.Empty;
-            MarkAsTopJob = jobApplication.TopJob;
-            SourcePageUrl = jobApplication.SourcePage ?? string.Empty;
-            ReviewPageUrl = jobApplication.ReviewPage ?? string.Empty;
-            LoginHints = jobApplication.LoginNotes ?? string.Empty;
-            CreatedAt = jobApplication.CreatedAt;
+            _existingId = detailDto.Id;
+            Company = detailDto.Company;
+            Role = detailDto.Position;
+            Salary = detailDto.Salary ?? string.Empty;
+            Description = detailDto.Description ?? string.Empty;
+            MarkAsTopJob = detailDto.TopJob;
+            SourcePageUrl = detailDto.SourcePage ?? string.Empty;
+            ReviewPageUrl = detailDto.ReviewPage ?? string.Empty;
+            LoginHints = detailDto.LoginNotes ?? string.Empty;
+            CreatedAt = detailDto.CreatedAt;
 
             // Load recruiter
-            if (jobApplication.Recruiter != null)
+            if (detailDto.Recruiter != null)
             {
-                RecruiterName = jobApplication.Recruiter.Name;
-                RecruiterCompany = jobApplication.Recruiter.Company ?? string.Empty;
+                RecruiterName = detailDto.Recruiter.Name;
+                RecruiterCompany = detailDto.Recruiter.Company ?? string.Empty;
             }
 
             // Load status items with their IDs
             StatusItems.Clear();
-            foreach (var statusItem in jobApplication.StatusItems.OrderBy(s => s.Occurred))
+            foreach (var statusItemDto in detailDto.StatusItems.OrderBy(s => s.Occurred))
             {
                 StatusItems.Add(new StatusItemViewModel
                 {
-                    Id = statusItem.Id,
-                    Occurred = statusItem.Occurred,
-                    Status = statusItem.Status
+                    Id = statusItemDto.Id,
+                    Occurred = statusItemDto.Occurred,
+                    Status = statusItemDto.Status
                 });
             }
 
@@ -239,13 +238,13 @@ namespace Resumetry.ViewModels
 
             // Load application events with their IDs
             ApplicationEvents.Clear();
-            foreach (var appEvent in jobApplication.ApplicationEvents.OrderBy(e => e.Occurred))
+            foreach (var eventDto in detailDto.ApplicationEvents.OrderBy(e => e.Occurred))
             {
                 ApplicationEvents.Add(new ApplicationEventViewModel
                 {
-                    Id = appEvent.Id,
-                    Occurred = appEvent.Occurred,
-                    Description = appEvent.Description
+                    Id = eventDto.Id,
+                    Occurred = eventDto.Occurred,
+                    Description = eventDto.Description
                 });
             }
 
@@ -289,7 +288,7 @@ namespace Resumetry.ViewModels
                 if (IsEditMode && _existingId.HasValue)
                 {
                     // Update existing application
-                    var updateDto = new UpdateJobApplicationDto(
+                    var updateDto = new JobApplicationUpdateDto(
                         Id: _existingId.Value,
                         Company: Company,
                         Position: Role,
@@ -308,7 +307,7 @@ namespace Resumetry.ViewModels
                 else
                 {
                     // Create new application
-                    var createDto = new CreateJobApplicationDto(
+                    var createDto = new JobApplicationCreateDto(
                         Company: Company,
                         Position: Role,
                         Description: string.IsNullOrWhiteSpace(Description) ? null : Description,

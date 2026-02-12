@@ -5,6 +5,7 @@ using Resumetry.Application.Interfaces;
 using Resumetry.Application.Services;
 using Resumetry.Domain.Entities;
 using Resumetry.Domain.Enums;
+using Resumetry.Domain.Interfaces;
 using Xunit;
 
 namespace Resumetry.Application.Tests.Services;
@@ -32,7 +33,7 @@ public class JobApplicationServiceTests
     public async Task CreateAsync_WithValidDto_CallsAddAsyncAndSaveChanges()
     {
         // Arrange
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Software Engineer");
 
@@ -58,7 +59,7 @@ public class JobApplicationServiceTests
             Email: "john@recruiter.com",
             Phone: "555-1234");
 
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Software Engineer",
             Recruiter: recruiterDto);
@@ -89,7 +90,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow.AddDays(-1), StatusEnum.Screen)
         };
 
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Software Engineer",
             StatusItems: statusItems);
@@ -118,7 +119,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow, "Received confirmation email")
         };
 
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Software Engineer",
             ApplicationEvents: events);
@@ -141,7 +142,7 @@ public class JobApplicationServiceTests
     public async Task CreateAsync_WithEmptyCompany_ThrowsArgumentException()
     {
         // Arrange
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "",
             Position: "Software Engineer");
 
@@ -155,7 +156,7 @@ public class JobApplicationServiceTests
     public async Task CreateAsync_WithEmptyPosition_ThrowsArgumentException()
     {
         // Arrange
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "");
 
@@ -169,7 +170,7 @@ public class JobApplicationServiceTests
     public async Task CreateAsync_ReturnsNewGuid()
     {
         // Arrange
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Software Engineer");
 
@@ -209,7 +210,7 @@ public class JobApplicationServiceTests
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "NewCorp",
             Position: "New Position",
@@ -258,7 +259,7 @@ public class JobApplicationServiceTests
             Email: "jane@recruiter.com",
             Phone: "555-9999");
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -304,7 +305,7 @@ public class JobApplicationServiceTests
             Email: "updated@email.com",
             Phone: "222-2222");
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -341,7 +342,7 @@ public class JobApplicationServiceTests
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -374,7 +375,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow, StatusEnum.Applied, Id: null) // null Id means new
         };
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -419,7 +420,7 @@ public class JobApplicationServiceTests
             new(newOccurred, StatusEnum.Screen, Id: statusItemId) // existing Id
         };
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -464,7 +465,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow, StatusEnum.Applied, Id: statusItemId1)
         };
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -498,7 +499,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow, "New event", Id: null) // null Id means new
         };
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -543,7 +544,7 @@ public class JobApplicationServiceTests
             new(newOccurred, "Updated description", Id: eventId) // existing Id
         };
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -588,7 +589,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow, "Event 1", Id: eventId1)
         };
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -610,7 +611,7 @@ public class JobApplicationServiceTests
         _mockRepository.Setup(x => x.GetByIdAsync(nonExistentId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((JobApplication?)null);
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: nonExistentId,
             Company: "TechCorp",
             Position: "Engineer");
@@ -625,7 +626,7 @@ public class JobApplicationServiceTests
     {
         // Arrange
         var existingId = Guid.NewGuid();
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "",
             Position: "Engineer");
@@ -656,7 +657,7 @@ public class JobApplicationServiceTests
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -689,7 +690,7 @@ public class JobApplicationServiceTests
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
-        var dto = new UpdateJobApplicationDto(
+        var dto = new JobApplicationUpdateDto(
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
@@ -716,7 +717,7 @@ public class JobApplicationServiceTests
             new(DateTime.UtcNow, "Applied online")
         };
 
-        var dto = new CreateJobApplicationDto(
+        var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Senior Engineer",
             Description: "Great opportunity",
@@ -749,6 +750,296 @@ public class JobApplicationServiceTests
         capturedEntity.Recruiter.Should().NotBeNull();
         capturedEntity.StatusItems.Should().HaveCount(1);
         capturedEntity.ApplicationEvents.Should().HaveCount(1);
+    }
+
+    #endregion
+
+    #region GetAllAsync Tests
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsEmptyCollection_WhenNoApplicationsExist()
+    {
+        // Arrange
+        _mockRepository.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<JobApplication>());
+
+        // Act
+        var result = await _sut.GetAllAsync();
+
+        // Assert
+        result.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ReturnsSummaryDtos_WithComputedFields()
+    {
+        // Arrange
+        var createdAt = DateTime.UtcNow.AddDays(-10);
+        var applications = new List<JobApplication>
+        {
+            new JobApplication
+            {
+                Id = Guid.NewGuid(),
+                Company = "TechCorp",
+                Position = "Engineer",
+                Salary = "$100k",
+                TopJob = true,
+                CreatedAt = createdAt
+            }
+        };
+
+        _mockRepository.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(applications);
+
+        // Act
+        var result = await _sut.GetAllAsync();
+
+        // Assert
+        result.Should().HaveCount(1);
+        var dto = result.First();
+        dto.Id.Should().Be(applications[0].Id);
+        dto.Company.Should().Be("TechCorp");
+        dto.Position.Should().Be("Engineer");
+        dto.Salary.Should().Be("$100k");
+        dto.TopJob.Should().BeTrue();
+        dto.CreatedAt.Should().Be(createdAt);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ComputesCurrentStatus_FromLatestStatusItem()
+    {
+        // Arrange
+        var applications = new List<JobApplication>
+        {
+            new JobApplication
+            {
+                Id = Guid.NewGuid(),
+                Company = "TechCorp",
+                Position = "Engineer",
+                StatusItems = new List<StatusItem>
+                {
+                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-5), Status = StatusEnum.Applied },
+                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-2), Status = StatusEnum.Screen },
+                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-1), Status = StatusEnum.Interview }
+                }
+            }
+        };
+
+        _mockRepository.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(applications);
+
+        // Act
+        var result = await _sut.GetAllAsync();
+
+        // Assert
+        var dto = result.First();
+        dto.CurrentStatus.Should().Be(StatusEnum.Interview);
+        dto.CurrentStatusText.Should().Be("Interview");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ComputesAppliedDate_FromFirstAppliedStatusItem()
+    {
+        // Arrange
+        var appliedDate = DateTime.UtcNow.AddDays(-10);
+        var applications = new List<JobApplication>
+        {
+            new JobApplication
+            {
+                Id = Guid.NewGuid(),
+                Company = "TechCorp",
+                Position = "Engineer",
+                CreatedAt = DateTime.UtcNow.AddDays(-15),
+                StatusItems = new List<StatusItem>
+                {
+                    new StatusItem { Occurred = appliedDate, Status = StatusEnum.Applied },
+                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-5), Status = StatusEnum.Screen }
+                }
+            }
+        };
+
+        _mockRepository.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(applications);
+
+        // Act
+        var result = await _sut.GetAllAsync();
+
+        // Assert
+        var dto = result.First();
+        dto.AppliedDate.Should().BeCloseTo(appliedDate, TimeSpan.FromSeconds(1));
+    }
+
+    #endregion
+
+    #region GetByIdAsync Tests
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsDetailDto_WithAllFields()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var createdAt = DateTime.UtcNow.AddDays(-5);
+        var application = new JobApplication
+        {
+            Id = id,
+            Company = "TechCorp",
+            Position = "Engineer",
+            Description = "Great job",
+            Salary = "$100k",
+            TopJob = true,
+            SourcePage = "linkedin.com",
+            ReviewPage = "glassdoor.com",
+            LoginNotes = "Use SSO",
+            CreatedAt = createdAt,
+            StatusItems = new List<StatusItem>(),
+            ApplicationEvents = new List<ApplicationEvent>()
+        };
+
+        _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(application);
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Id.Should().Be(id);
+        result.Company.Should().Be("TechCorp");
+        result.Position.Should().Be("Engineer");
+        result.Description.Should().Be("Great job");
+        result.Salary.Should().Be("$100k");
+        result.TopJob.Should().BeTrue();
+        result.SourcePage.Should().Be("linkedin.com");
+        result.ReviewPage.Should().Be("glassdoor.com");
+        result.LoginNotes.Should().Be("Use SSO");
+        result.CreatedAt.Should().Be(createdAt);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ReturnsNull_WhenNotFound()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((JobApplication?)null);
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_MapsRecruiter_WhenPresent()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var application = new JobApplication
+        {
+            Id = id,
+            Company = "TechCorp",
+            Position = "Engineer",
+            Recruiter = new Recruiter
+            {
+                Name = "John Doe",
+                Company = "RecruiterCo",
+                Email = "john@email.com",
+                Phone = "555-1234"
+            }
+        };
+
+        _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(application);
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.Recruiter.Should().NotBeNull();
+        result.Recruiter!.Name.Should().Be("John Doe");
+        result.Recruiter.Company.Should().Be("RecruiterCo");
+        result.Recruiter.Email.Should().Be("john@email.com");
+        result.Recruiter.Phone.Should().Be("555-1234");
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_MapsStatusItemsAndEvents()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var statusItemId = Guid.NewGuid();
+        var eventId = Guid.NewGuid();
+        var application = new JobApplication
+        {
+            Id = id,
+            Company = "TechCorp",
+            Position = "Engineer",
+            StatusItems = new List<StatusItem>
+            {
+                new StatusItem { Id = statusItemId, Occurred = DateTime.UtcNow, Status = StatusEnum.Applied }
+            },
+            ApplicationEvents = new List<ApplicationEvent>
+            {
+                new ApplicationEvent { Id = eventId, Occurred = DateTime.UtcNow, Description = "Applied online" }
+            }
+        };
+
+        _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(application);
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        result.Should().NotBeNull();
+        result!.StatusItems.Should().HaveCount(1);
+        result.StatusItems.First().Id.Should().Be(statusItemId);
+        result.StatusItems.First().Status.Should().Be(StatusEnum.Applied);
+        result.ApplicationEvents.Should().HaveCount(1);
+        result.ApplicationEvents.First().Id.Should().Be(eventId);
+        result.ApplicationEvents.First().Description.Should().Be("Applied online");
+    }
+
+    #endregion
+
+    #region DeleteAsync Tests
+
+    [Fact]
+    public async Task DeleteAsync_CallsDeleteAndSaveChanges()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var application = new JobApplication
+        {
+            Id = id,
+            Company = "TechCorp",
+            Position = "Engineer"
+        };
+
+        _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(application);
+
+        // Act
+        await _sut.DeleteAsync(id);
+
+        // Assert
+        _mockRepository.Verify(x => x.Delete(application), Times.Once);
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ThrowsKeyNotFoundException_WhenNotFound()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((JobApplication?)null);
+
+        // Act & Assert
+        await FluentActions.Invoking(() => _sut.DeleteAsync(id))
+            .Should().ThrowAsync<KeyNotFoundException>();
     }
 
     #endregion

@@ -1,5 +1,6 @@
 using Microsoft.Win32;
 using Resumetry.Application.Interfaces;
+using Resumetry.Domain.Interfaces;
 using System.Windows.Input;
 
 namespace Resumetry.ViewModels

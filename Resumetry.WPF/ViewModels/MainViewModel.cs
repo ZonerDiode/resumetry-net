@@ -9,16 +9,16 @@ namespace Resumetry.ViewModels
     public class MainViewModel : ViewModelBase
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IJobApplicationService _jobApplicationService;
         private string _filterText = string.Empty;
         private ObservableCollection<JobApplicationViewModel> _jobApplications;
         private ObservableCollection<JobApplicationViewModel> _filteredJobApplications;
         private JobApplicationViewModel? _selectedJobApplication;
 
-        public MainViewModel(IServiceProvider serviceProvider, IUnitOfWork unitOfWork)
+        public MainViewModel(IServiceProvider serviceProvider, IJobApplicationService jobApplicationService)
         {
             _serviceProvider = serviceProvider;
-            _unitOfWork = unitOfWork;
+            _jobApplicationService = jobApplicationService;
             _jobApplications = [];
             _filteredJobApplications = [];
 
@@ -73,11 +73,11 @@ namespace Resumetry.ViewModels
 
             try
             {
-                var jobApplications = await _unitOfWork.JobApplications.GetAllAsync();
+                var summaryDtos = await _jobApplicationService.GetAllAsync();
 
-                foreach (var jobApplication in jobApplications)
+                foreach (var summaryDto in summaryDtos)
                 {
-                    _jobApplications.Add(new JobApplicationViewModel(jobApplication));
+                    _jobApplications.Add(new JobApplicationViewModel(summaryDto));
                 }
 
                 ApplyFilter();
@@ -124,9 +124,9 @@ namespace Resumetry.ViewModels
 
             try
             {
-                // Load the full job application with all related data
-                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id);
-                if (jobApplication == null)
+                // Load the full job application detail DTO
+                var detailDto = await _jobApplicationService.GetByIdAsync(SelectedJobApplication.Id);
+                if (detailDto == null)
                 {
                     System.Windows.MessageBox.Show("Job application not found.",
                         "Error",
@@ -136,7 +136,7 @@ namespace Resumetry.ViewModels
                 }
 
                 var formViewModel = _serviceProvider.GetRequiredService<ApplicationFormViewModel>();
-                formViewModel.LoadExistingJobApplication(jobApplication);
+                formViewModel.LoadExistingJobApplication(detailDto);
 
                 var formWindow = new ApplicationFormWindow(formViewModel);
                 if (formWindow.ShowDialog() == true)
@@ -168,23 +168,18 @@ namespace Resumetry.ViewModels
 
             try
             {
-                // Load the full job application
-                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id);
-                if (jobApplication == null)
-                {
-                    System.Windows.MessageBox.Show("Job application not found.",
-                        "Error",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Error);
-                    return;
-                }
-
-                // Delete the job application
-                _unitOfWork.JobApplications.Delete(jobApplication);
-                await _unitOfWork.SaveChangesAsync();
+                // Delete the job application via service
+                await _jobApplicationService.DeleteAsync(SelectedJobApplication.Id);
 
                 // Refresh the list
                 await LoadJobApplicationsAsync();
+            }
+            catch (KeyNotFoundException)
+            {
+                System.Windows.MessageBox.Show("Job application not found.",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
             catch (Exception ex)
             {

@@ -1,9 +1,10 @@
 namespace Resumetry.Application.DTOs;
 
 /// <summary>
-/// Data transfer object for creating a new job application.
+/// Data transfer object for updating an existing job application.
 /// </summary>
-public record CreateJobApplicationDto(
+public record JobApplicationUpdateDto(
+    Guid Id,
     string Company,
     string Position,
     string? Description = null,

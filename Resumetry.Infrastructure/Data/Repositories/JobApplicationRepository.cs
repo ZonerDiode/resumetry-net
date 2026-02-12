@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Entities;
+using Resumetry.Domain.Interfaces;
 
 namespace Resumetry.Infrastructure.Data.Repositories
 {
