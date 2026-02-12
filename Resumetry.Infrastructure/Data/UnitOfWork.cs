@@ -3,33 +3,13 @@ using Resumetry.Infrastructure.Data.Repositories;
 
 namespace Resumetry.Infrastructure.Data
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
     {
-        private readonly ApplicationDbContext _context;
-        private IJobApplicationRepository? _jobApplicationRepository;
-
-        public UnitOfWork(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        public IJobApplicationRepository JobApplications
-        {
-            get
-            {
-                _jobApplicationRepository ??= new JobApplicationRepository(_context);
-                return _jobApplicationRepository;
-            }
-        }
+        public IJobApplicationRepository JobApplications { get; } = new JobApplicationRepository(context);
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            return await _context.SaveChangesAsync(cancellationToken);
-        }
-
-        public void Dispose()
-        {
-            _context.Dispose();
+            return await context.SaveChangesAsync(cancellationToken);
         }
     }
 }
