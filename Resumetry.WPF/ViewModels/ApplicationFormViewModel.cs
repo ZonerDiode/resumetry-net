@@ -11,7 +11,7 @@ namespace Resumetry.ViewModels
     {
         private Guid? _id;
         private DateTime _occurred = DateTime.Now;
-        private StatusEnum _status = StatusEnum.APPLIED;
+        private StatusEnum _status = StatusEnum.Applied;
 
         public Guid? Id
         {
@@ -61,7 +61,6 @@ namespace Resumetry.ViewModels
 
     public class ApplicationFormViewModel : ViewModelBase
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IJobApplicationService _jobApplicationService;
         private Guid? _existingId;
         private string _company = string.Empty;
@@ -76,12 +75,9 @@ namespace Resumetry.ViewModels
         private string _loginHints = string.Empty;
         private string _description = string.Empty;
 
-        public ApplicationFormViewModel(IUnitOfWork unitOfWork, IJobApplicationService jobApplicationService)
+        public ApplicationFormViewModel(IJobApplicationService jobApplicationService)
         {
-            _unitOfWork = unitOfWork;
             _jobApplicationService = jobApplicationService;
-            StatusItems = [];
-            ApplicationEvents = [];
 
             AddStatusCommand = new RelayCommand(_ => AddStatus());
             RemoveStatusCommand = new RelayCommand(item => RemoveStatus(item as StatusItemViewModel));
@@ -162,11 +158,11 @@ namespace Resumetry.ViewModels
             set => SetProperty(ref _description, value);
         }
 
-        public ObservableCollection<StatusItemViewModel> StatusItems { get; }
-        public ObservableCollection<ApplicationEventViewModel> ApplicationEvents { get; }
+        public ObservableCollection<StatusItemViewModel> StatusItems { get; } = [];
+        public ObservableCollection<ApplicationEventViewModel> ApplicationEvents { get; } = [];
 
         public ICommand AddStatusCommand { get; }
-        public ICommand RemoveStatusCommand { get; }
+        public ICommand RemoveStatusCommand { get; } 
         public ICommand AddNoteCommand { get; }
         public ICommand RemoveNoteCommand { get; }
 

@@ -11,12 +11,12 @@
      */
     public enum StatusEnum
     {
-        APPLIED,
-        REJECTED,
-        SCREEN,
-        INTERVIEW,
-        OFFER,
-        WITHDRAWN,
-        NOOFFER
+        Applied,
+        Rejected,
+        Screen,
+        Interview,
+        Offer,
+        Withdrawn,
+        NoOffer
     }
 }

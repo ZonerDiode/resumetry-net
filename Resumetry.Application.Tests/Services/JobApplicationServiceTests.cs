@@ -85,8 +85,8 @@ public class JobApplicationServiceTests
         // Arrange
         var statusItems = new List<StatusItemDto>
         {
-            new(DateTime.UtcNow.AddDays(-2), StatusEnum.APPLIED),
-            new(DateTime.UtcNow.AddDays(-1), StatusEnum.SCREEN)
+            new(DateTime.UtcNow.AddDays(-2), StatusEnum.Applied),
+            new(DateTime.UtcNow.AddDays(-1), StatusEnum.Screen)
         };
 
         var dto = new CreateJobApplicationDto(
@@ -104,8 +104,8 @@ public class JobApplicationServiceTests
         // Assert
         capturedEntity.Should().NotBeNull();
         capturedEntity!.StatusItems.Should().HaveCount(2);
-        capturedEntity.StatusItems.Should().Contain(s => s.Status == StatusEnum.APPLIED);
-        capturedEntity.StatusItems.Should().Contain(s => s.Status == StatusEnum.SCREEN);
+        capturedEntity.StatusItems.Should().Contain(s => s.Status == StatusEnum.Applied);
+        capturedEntity.StatusItems.Should().Contain(s => s.Status == StatusEnum.Screen);
     }
 
     [Fact]
@@ -371,7 +371,7 @@ public class JobApplicationServiceTests
 
         var statusItems = new List<StatusItemDto>
         {
-            new(DateTime.UtcNow, StatusEnum.APPLIED, Id: null) // null Id means new
+            new(DateTime.UtcNow, StatusEnum.Applied, Id: null) // null Id means new
         };
 
         var dto = new UpdateJobApplicationDto(
@@ -385,7 +385,7 @@ public class JobApplicationServiceTests
 
         // Assert
         existingEntity.StatusItems.Should().HaveCount(1);
-        existingEntity.StatusItems.First().Status.Should().Be(StatusEnum.APPLIED);
+        existingEntity.StatusItems.First().Status.Should().Be(StatusEnum.Applied);
     }
 
     [Fact]
@@ -405,7 +405,7 @@ public class JobApplicationServiceTests
                 {
                     Id = statusItemId,
                     Occurred = DateTime.UtcNow.AddDays(-5),
-                    Status = StatusEnum.APPLIED
+                    Status = StatusEnum.Applied
                 }
             }
         };
@@ -416,7 +416,7 @@ public class JobApplicationServiceTests
         var newOccurred = DateTime.UtcNow.AddDays(-3);
         var statusItems = new List<StatusItemDto>
         {
-            new(newOccurred, StatusEnum.SCREEN, Id: statusItemId) // existing Id
+            new(newOccurred, StatusEnum.Screen, Id: statusItemId) // existing Id
         };
 
         var dto = new UpdateJobApplicationDto(
@@ -432,7 +432,7 @@ public class JobApplicationServiceTests
         existingEntity.StatusItems.Should().HaveCount(1);
         var updatedItem = existingEntity.StatusItems.First();
         updatedItem.Id.Should().Be(statusItemId);
-        updatedItem.Status.Should().Be(StatusEnum.SCREEN);
+        updatedItem.Status.Should().Be(StatusEnum.Screen);
         updatedItem.Occurred.Should().BeCloseTo(newOccurred, TimeSpan.FromSeconds(1));
     }
 
@@ -450,8 +450,8 @@ public class JobApplicationServiceTests
             Position = "Engineer",
             StatusItems = new List<StatusItem>
             {
-                new StatusItem { Id = statusItemId1, Occurred = DateTime.UtcNow, Status = StatusEnum.APPLIED },
-                new StatusItem { Id = statusItemId2, Occurred = DateTime.UtcNow, Status = StatusEnum.SCREEN }
+                new StatusItem { Id = statusItemId1, Occurred = DateTime.UtcNow, Status = StatusEnum.Applied },
+                new StatusItem { Id = statusItemId2, Occurred = DateTime.UtcNow, Status = StatusEnum.Screen }
             }
         };
 
@@ -461,7 +461,7 @@ public class JobApplicationServiceTests
         // Only include one of the two existing items
         var statusItems = new List<StatusItemDto>
         {
-            new(DateTime.UtcNow, StatusEnum.APPLIED, Id: statusItemId1)
+            new(DateTime.UtcNow, StatusEnum.Applied, Id: statusItemId1)
         };
 
         var dto = new UpdateJobApplicationDto(
@@ -648,8 +648,8 @@ public class JobApplicationServiceTests
             Position = "Engineer",
             StatusItems = new List<StatusItem>
             {
-                new StatusItem { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.APPLIED },
-                new StatusItem { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.SCREEN }
+                new StatusItem { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.Applied },
+                new StatusItem { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.Screen }
             }
         };
 
@@ -709,7 +709,7 @@ public class JobApplicationServiceTests
         var recruiterDto = new RecruiterDto("John Doe", "RecruiterCo", "john@email.com", "555-1234");
         var statusItems = new List<StatusItemDto>
         {
-            new(DateTime.UtcNow, StatusEnum.APPLIED)
+            new(DateTime.UtcNow, StatusEnum.Applied)
         };
         var events = new List<ApplicationEventDto>
         {

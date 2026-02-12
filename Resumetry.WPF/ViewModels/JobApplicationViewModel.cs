@@ -37,7 +37,7 @@ namespace Resumetry.ViewModels
             get
             {
                 var appliedStatus = _jobApplication.StatusItems
-                    .Where(s => s.Status == StatusEnum.APPLIED)
+                    .Where(s => s.Status == StatusEnum.Applied)
                     .OrderBy(s => s.Occurred)
                     .FirstOrDefault();
                 return appliedStatus?.Occurred ?? _jobApplication.CreatedAt;
