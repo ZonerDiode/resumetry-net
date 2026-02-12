@@ -1,124 +1,70 @@
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Enums;
 using Resumetry.ViewModels;
+using Resumetry.WPF.Services;
 using Xunit;
 
 namespace Resumetry.WPF.Tests.ViewModels;
 
 /// <summary>
-/// Tests for MainViewModel's proper use of IServiceScopeFactory to manage scoped service lifetimes.
+/// Tests for MainViewModel's proper use of IScopedRunner and IDialogService.
 /// </summary>
 public class MainViewModelScopeTests
 {
-    private readonly Mock<IServiceScopeFactory> _mockScopeFactory;
-    private readonly Mock<IServiceScope> _mockScope;
-    private readonly Mock<IServiceProvider> _mockScopedServiceProvider;
-    private readonly Mock<IJobApplicationService> _mockJobApplicationService;
-
-    /// <summary>
-    /// Testable subclass that bypasses UI dialogs.
-    /// </summary>
-    private class TestableMainViewModel : MainViewModel
-    {
-        public TestableMainViewModel(IServiceScopeFactory serviceScopeFactory)
-            : base(serviceScopeFactory)
-        {
-        }
-
-        protected override bool ConfirmDelete(JobApplicationViewModel app)
-        {
-            // Always confirm in tests - no dialog shown
-            return true;
-        }
-    }
+    private readonly Mock<IScopedRunner> _mockScopedRunner;
+    private readonly Mock<IDialogService> _mockDialogService;
+    private readonly List<JobApplicationSummaryDto> _testSummaryDtos;
 
     public MainViewModelScopeTests()
     {
-        _mockScopeFactory = new Mock<IServiceScopeFactory>();
-        _mockScope = new Mock<IServiceScope>();
-        _mockScopedServiceProvider = new Mock<IServiceProvider>();
-        _mockJobApplicationService = new Mock<IJobApplicationService>();
+        _mockScopedRunner = new Mock<IScopedRunner>();
+        _mockDialogService = new Mock<IDialogService>();
+        _testSummaryDtos = [];
 
-        // Setup the scope factory to return the mock scope
-        _mockScopeFactory
-            .Setup(f => f.CreateScope())
-            .Returns(_mockScope.Object);
-
-        // Setup the scope to return the scoped service provider
-        _mockScope
-            .Setup(s => s.ServiceProvider)
-            .Returns(_mockScopedServiceProvider.Object);
-
-        // Setup the scoped service provider to return the job application service
-        _mockScopedServiceProvider
-            .Setup(sp => sp.GetService(typeof(IJobApplicationService)))
-            .Returns(_mockJobApplicationService.Object);
-
-        // Default setup for GetAllAsync
-        _mockJobApplicationService
-            .Setup(s => s.GetAllAsync())
-            .ReturnsAsync(new List<JobApplicationSummaryDto>());
+        // Default setup for RunAsync with IJobApplicationService - return empty list
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
+            .ReturnsAsync(_testSummaryDtos);
     }
 
     [Fact]
-    public void Constructor_WithServiceScopeFactory_DoesNotThrow()
+    public void Constructor_WithValidDependencies_DoesNotThrow()
     {
         // Arrange & Act
-        Action act = () => new MainViewModel(_mockScopeFactory.Object);
+        Action act = () => new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
 
         // Assert
         act.Should().NotThrow();
     }
 
     [Fact]
-    public void Constructor_WithNullServiceScopeFactory_ThrowsArgumentNullException()
+    public void Constructor_WithNullScopedRunner_ThrowsArgumentNullException()
     {
         // Arrange & Act
-        Action act = () => new MainViewModel(null!);
+        Action act = () => new MainViewModel(null!, _mockDialogService.Object);
 
         // Assert
         act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("serviceScopeFactory");
+            .WithParameterName("scopedRunner");
     }
 
     [Fact]
-    public async Task LoadJobApplicationsAsync_CreatesScope()
+    public void Constructor_WithNullDialogService_ThrowsArgumentNullException()
     {
-        // Arrange
-        var viewModel = new MainViewModel(_mockScopeFactory.Object);
-
-        // Act
-        await Task.Delay(100); // Give constructor's initial load time to complete
-
-        // Assert - scope should have been created during initial load
-        _mockScopeFactory.Verify(f => f.CreateScope(), Times.AtLeastOnce());
-    }
-
-    [Fact]
-    public async Task LoadJobApplicationsAsync_DisposesScope()
-    {
-        // Arrange
-        var viewModel = new MainViewModel(_mockScopeFactory.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
-
-        _mockScope.Invocations.Clear();
-
-        // Act
-        var refreshCommand = viewModel.RefreshCommand as AsyncRelayCommand;
-        refreshCommand!.Execute(null);
-        if (refreshCommand.RunningTask != null)
-            await refreshCommand.RunningTask;
+        // Arrange & Act
+        Action act = () => new MainViewModel(_mockScopedRunner.Object, null!);
 
         // Assert
-        _mockScope.Verify(s => s.Dispose(), Times.Once());
+        act.Should().Throw<ArgumentNullException>()
+            .WithParameterName("dialogService");
     }
 
     [Fact]
-    public async Task LoadJobApplicationsAsync_ResolvesJobApplicationService_FromScope()
+    public async Task Constructor_LoadsInitialData_UsingScopedRunner()
     {
         // Arrange
         var summaryDtos = new List<JobApplicationSummaryDto>
@@ -135,91 +81,42 @@ public class MainViewModelScopeTests
                 DateTime.Now)
         };
 
-        _mockJobApplicationService
-            .Setup(s => s.GetAllAsync())
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
             .ReturnsAsync(summaryDtos);
 
-        var viewModel = new MainViewModel(_mockScopeFactory.Object);
+        // Act
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
         await Task.Delay(100); // Give constructor's initial load time to complete
 
-        // Act - verify service is resolved from the scoped service provider
-        _mockScopedServiceProvider.Verify(
-            sp => sp.GetService(typeof(IJobApplicationService)),
+        // Assert
+        _mockScopedRunner.Verify(
+            r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()),
             Times.AtLeastOnce());
     }
 
     [Fact]
-    public async Task DeleteApplicationAsync_CreatesAndDisposesScope()
+    public async Task RefreshCommand_CallsScopedRunner()
     {
         // Arrange
-        var testId = Guid.NewGuid();
-        var summaryDtos = new List<JobApplicationSummaryDto>
-        {
-            new(
-                testId,
-                "Test Company",
-                "Developer",
-                null,
-                false,
-                DateTime.Now,
-                StatusEnum.Applied,
-                "Applied",
-                DateTime.Now)
-        };
-
-        _mockJobApplicationService
-            .Setup(s => s.GetAllAsync())
-            .ReturnsAsync(summaryDtos);
-
-        _mockJobApplicationService
-            .Setup(s => s.DeleteAsync(It.IsAny<Guid>()))
-            .Returns(Task.CompletedTask);
-
-        // Use testable subclass to bypass confirmation dialog
-        var viewModel = new TestableMainViewModel(_mockScopeFactory.Object);
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
         await Task.Delay(100); // Give constructor's initial load time to complete
 
-        // Select the first application
-        viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
-
-        var scopeCreateCountBefore = _mockScopeFactory.Invocations.Count;
-        var scopeDisposeCountBefore = _mockScope.Invocations.Count(i => i.Method.Name == "Dispose");
+        _mockScopedRunner.Invocations.Clear();
 
         // Act
-        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
-        deleteCommand!.Execute(null);
-        if (deleteCommand.RunningTask != null)
-            await deleteCommand.RunningTask;
-
-        // Assert - should have created at least one more scope (delete + refresh)
-        _mockScopeFactory.Invocations.Count.Should().BeGreaterThan(scopeCreateCountBefore);
-
-        // Assert - should have disposed the scopes
-        var scopeDisposeCountAfter = _mockScope.Invocations.Count(i => i.Method.Name == "Dispose");
-        scopeDisposeCountAfter.Should().BeGreaterThan(scopeDisposeCountBefore);
-    }
-
-    [Fact]
-    public async Task RefreshCommand_CreatesNewScope_EachTime()
-    {
-        // Arrange
-        var viewModel = new MainViewModel(_mockScopeFactory.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
-
-        var initialScopeCount = _mockScopeFactory.Invocations.Count;
-
-        // Act - refresh twice
         var refreshCommand = viewModel.RefreshCommand as AsyncRelayCommand;
         refreshCommand!.Execute(null);
         if (refreshCommand.RunningTask != null)
             await refreshCommand.RunningTask;
 
-        refreshCommand.Execute(null);
-        if (refreshCommand.RunningTask != null)
-            await refreshCommand.RunningTask;
-
-        // Assert - should have created 2 more scopes (one per refresh)
-        _mockScopeFactory.Invocations.Count.Should().Be(initialScopeCount + 2);
+        // Assert
+        _mockScopedRunner.Verify(
+            r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()),
+            Times.Once());
     }
 
     [Fact]
@@ -250,17 +147,195 @@ public class MainViewModelScopeTests
                 DateTime.Now)
         };
 
-        _mockJobApplicationService
-            .Setup(s => s.GetAllAsync())
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
             .ReturnsAsync(summaryDtos);
 
         // Act
-        var viewModel = new MainViewModel(_mockScopeFactory.Object);
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
         await Task.Delay(100); // Give constructor's initial load time to complete
 
         // Assert
         viewModel.FilteredJobApplications.Should().HaveCount(2);
         viewModel.FilteredJobApplications.First().Company.Should().Be("Company A");
         viewModel.FilteredJobApplications.Last().Company.Should().Be("Company B");
+    }
+
+    [Fact]
+    public async Task LoadJobApplicationsAsync_OnError_ShowsErrorDialog()
+    {
+        // Arrange
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
+            .ThrowsAsync(new Exception("Test error"));
+
+        // Act
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        await Task.Delay(150); // Give constructor's initial load time to complete and error to be handled
+
+        // Assert
+        _mockDialogService.Verify(
+            d => d.ShowError(
+                It.Is<string>(s => s.Contains("Test error")),
+                It.IsAny<string>()),
+            Times.AtLeastOnce());
+    }
+
+    [Fact]
+    public async Task DeleteApplicationAsync_CallsConfirmDialog()
+    {
+        // Arrange
+        var testId = Guid.NewGuid();
+        var summaryDtos = new List<JobApplicationSummaryDto>
+        {
+            new(
+                testId,
+                "Test Company",
+                "Developer",
+                null,
+                false,
+                DateTime.Now,
+                StatusEnum.Applied,
+                "Applied",
+                DateTime.Now)
+        };
+
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
+            .ReturnsAsync(summaryDtos);
+
+        _mockDialogService
+            .Setup(d => d.Confirm(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(false); // User cancels
+
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        await Task.Delay(100); // Give constructor's initial load time to complete
+
+        // Select the first application
+        viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
+
+        // Act
+        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
+        deleteCommand!.Execute(null);
+        if (deleteCommand.RunningTask != null)
+            await deleteCommand.RunningTask;
+
+        // Assert
+        _mockDialogService.Verify(
+            d => d.Confirm(
+                It.Is<string>(s => s.Contains("Test Company") && s.Contains("Developer")),
+                It.Is<string>(s => s.Contains("Confirm Delete"))),
+            Times.Once());
+    }
+
+    [Fact]
+    public async Task DeleteApplicationAsync_WhenConfirmed_CallsScopedRunnerToDelete()
+    {
+        // Arrange
+        var testId = Guid.NewGuid();
+        var summaryDtos = new List<JobApplicationSummaryDto>
+        {
+            new(
+                testId,
+                "Test Company",
+                "Developer",
+                null,
+                false,
+                DateTime.Now,
+                StatusEnum.Applied,
+                "Applied",
+                DateTime.Now)
+        };
+
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
+            .ReturnsAsync(summaryDtos);
+
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService>(
+                It.IsAny<Func<IJobApplicationService, Task>>()))
+            .Returns(Task.CompletedTask);
+
+        _mockDialogService
+            .Setup(d => d.Confirm(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(true); // User confirms
+
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        await Task.Delay(100); // Give constructor's initial load time to complete
+
+        // Select the first application
+        viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
+
+        _mockScopedRunner.Invocations.Clear();
+
+        // Act
+        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
+        deleteCommand!.Execute(null);
+        if (deleteCommand.RunningTask != null)
+            await deleteCommand.RunningTask;
+
+        // Assert - should call RunAsync for delete and then for refresh
+        _mockScopedRunner.Verify(
+            r => r.RunAsync<IJobApplicationService>(
+                It.IsAny<Func<IJobApplicationService, Task>>()),
+            Times.Once());
+
+        _mockScopedRunner.Verify(
+            r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()),
+            Times.Once());
+    }
+
+    [Fact]
+    public async Task DeleteApplicationAsync_WhenCancelled_DoesNotCallScopedRunner()
+    {
+        // Arrange
+        var testId = Guid.NewGuid();
+        var summaryDtos = new List<JobApplicationSummaryDto>
+        {
+            new(
+                testId,
+                "Test Company",
+                "Developer",
+                null,
+                false,
+                DateTime.Now,
+                StatusEnum.Applied,
+                "Applied",
+                DateTime.Now)
+        };
+
+        _mockScopedRunner
+            .Setup(r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
+                It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()))
+            .ReturnsAsync(summaryDtos);
+
+        _mockDialogService
+            .Setup(d => d.Confirm(It.IsAny<string>(), It.IsAny<string>()))
+            .Returns(false); // User cancels
+
+        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        await Task.Delay(100); // Give constructor's initial load time to complete
+
+        // Select the first application
+        viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
+
+        _mockScopedRunner.Invocations.Clear();
+
+        // Act
+        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
+        deleteCommand!.Execute(null);
+        if (deleteCommand.RunningTask != null)
+            await deleteCommand.RunningTask;
+
+        // Assert - should NOT call RunAsync for delete (only confirm was called)
+        _mockScopedRunner.Verify(
+            r => r.RunAsync<IJobApplicationService>(
+                It.IsAny<Func<IJobApplicationService, Task>>()),
+            Times.Never());
     }
 }

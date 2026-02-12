@@ -1,22 +1,23 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using Microsoft.Extensions.DependencyInjection;
 using Resumetry.Application.Interfaces;
-using Resumetry.Views;
+using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly IScopedRunner _scopedRunner;
+        private readonly IDialogService _dialogService;
         private string _filterText = string.Empty;
         private ObservableCollection<JobApplicationViewModel> _jobApplications;
         private ObservableCollection<JobApplicationViewModel> _filteredJobApplications;
         private JobApplicationViewModel? _selectedJobApplication;
 
-        public MainViewModel(IServiceScopeFactory serviceScopeFactory)
+        public MainViewModel(IScopedRunner scopedRunner, IDialogService dialogService)
         {
-            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+            _scopedRunner = scopedRunner ?? throw new ArgumentNullException(nameof(scopedRunner));
+            _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
             _jobApplications = [];
             _filteredJobApplications = [];
 
@@ -30,10 +31,7 @@ namespace Resumetry.ViewModels
             // Load initial data
             ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
             {
-                System.Windows.MessageBox.Show($"Error loading initial data: {ex.Message}",
-                    "Startup Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                _dialogService.ShowError($"Error loading initial data: {ex.Message}", "Startup Error");
             });
         }
 
@@ -77,10 +75,8 @@ namespace Resumetry.ViewModels
 
             try
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
-
-                var summaryDtos = await jobApplicationService.GetAllAsync();
+                var summaryDtos = await _scopedRunner.RunAsync<IJobApplicationService, IEnumerable<Application.DTOs.JobApplicationSummaryDto>>(
+                    async svc => await svc.GetAllAsync());
 
                 foreach (var summaryDto in summaryDtos)
                 {
@@ -92,10 +88,7 @@ namespace Resumetry.ViewModels
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Error loading job applications: {ex.Message}",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                _dialogService.ShowError($"Error loading job applications: {ex.Message}", "Error");
             }
         }
 
@@ -116,18 +109,12 @@ namespace Resumetry.ViewModels
 
         private void OpenNewApplicationForm()
         {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var formViewModel = scope.ServiceProvider.GetRequiredService<ApplicationFormViewModel>();
-            var formWindow = new ApplicationFormWindow(formViewModel);
-            if (formWindow.ShowDialog() == true)
+            if (_dialogService.ShowApplicationForm())
             {
                 // Refresh the list after adding
                 ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
                 {
-                    System.Windows.MessageBox.Show($"Error refreshing data: {ex.Message}",
-                        "Error",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Error);
+                    _dialogService.ShowError($"Error refreshing data: {ex.Message}", "Error");
                 });
             }
         }
@@ -138,25 +125,17 @@ namespace Resumetry.ViewModels
 
             try
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
-                var formViewModel = scope.ServiceProvider.GetRequiredService<ApplicationFormViewModel>();
-
                 // Load the full job application detail DTO
-                var detailDto = await jobApplicationService.GetByIdAsync(SelectedJobApplication.Id);
+                var detailDto = await _scopedRunner.RunAsync<IJobApplicationService, Application.DTOs.JobApplicationDetailDto?>(
+                    async svc => await svc.GetByIdAsync(SelectedJobApplication.Id));
+
                 if (detailDto == null)
                 {
-                    System.Windows.MessageBox.Show("Job application not found.",
-                        "Error",
-                        System.Windows.MessageBoxButton.OK,
-                        System.Windows.MessageBoxImage.Error);
+                    _dialogService.ShowError("Job application not found.", "Error");
                     return;
                 }
 
-                formViewModel.LoadExistingJobApplication(detailDto);
-
-                var formWindow = new ApplicationFormWindow(formViewModel);
-                if (formWindow.ShowDialog() == true)
+                if (_dialogService.ShowApplicationForm(vm => vm.LoadExistingJobApplication(detailDto)))
                 {
                     // Refresh the list after editing
                     await LoadJobApplicationsAsync();
@@ -164,10 +143,7 @@ namespace Resumetry.ViewModels
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Error loading job application: {ex.Message}",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                _dialogService.ShowError($"Error loading job application: {ex.Message}", "Error");
             }
         }
 
@@ -175,72 +151,45 @@ namespace Resumetry.ViewModels
         {
             if (SelectedJobApplication == null) return;
 
-            if (!ConfirmDelete(SelectedJobApplication))
+            if (!_dialogService.Confirm(
+                $"Are you sure you want to delete the application for {SelectedJobApplication.Company} - {SelectedJobApplication.Position}?\n\nThis action cannot be undone.",
+                "Confirm Delete"))
+            {
                 return;
+            }
 
             try
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
-
-                // Delete the job application via service
-                await jobApplicationService.DeleteAsync(SelectedJobApplication.Id);
+                await _scopedRunner.RunAsync<IJobApplicationService>(
+                    async svc => await svc.DeleteAsync(SelectedJobApplication.Id));
 
                 // Refresh the list
                 await LoadJobApplicationsAsync();
             }
             catch (KeyNotFoundException)
             {
-                System.Windows.MessageBox.Show("Job application not found.",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                _dialogService.ShowError("Job application not found.", "Error");
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Error deleting job application: {ex.Message}",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                _dialogService.ShowError($"Error deleting job application: {ex.Message}", "Error");
             }
-        }
-
-        /// <summary>
-        /// Shows a confirmation dialog for deleting a job application.
-        /// Virtual to allow testing without UI interaction.
-        /// </summary>
-        protected virtual bool ConfirmDelete(JobApplicationViewModel app)
-        {
-            var result = System.Windows.MessageBox.Show(
-                $"Are you sure you want to delete the application for {app.Company} - {app.Position}?\n\nThis action cannot be undone.",
-                "Confirm Delete",
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
-
-            return result == System.Windows.MessageBoxResult.Yes;
         }
 
         private void OpenReports()
         {
             // TODO: Implement reports functionality
-            System.Windows.MessageBox.Show("Reports functionality coming soon!", "Reports",
-                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            _dialogService.ShowInfo("Reports functionality coming soon!", "Reports");
         }
 
         private void OpenSettings()
         {
-            using var scope = _serviceScopeFactory.CreateScope();
-            var settingsViewModel = scope.ServiceProvider.GetRequiredService<SettingsViewModel>();
-            var settingsWindow = new SettingsWindow(settingsViewModel);
-            settingsWindow.ShowDialog();
+            _dialogService.ShowSettings();
 
             // Refresh the list after closing settings (in case data was imported)
             ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
             {
-                System.Windows.MessageBox.Show($"Error refreshing data: {ex.Message}",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                _dialogService.ShowError($"Error refreshing data: {ex.Message}", "Error");
             });
         }
     }

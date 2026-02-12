@@ -7,6 +7,7 @@ using Resumetry.Domain.Interfaces;
 using Resumetry.Infrastructure.Data;
 using Resumetry.Infrastructure.Data.Repositories;
 using Resumetry.ViewModels;
+using Resumetry.WPF.Services;
 using System.IO;
 using System.Windows;
 
@@ -48,6 +49,10 @@ namespace Resumetry
             // Register services
             services.AddScoped<IImportService, ImportService>();
             services.AddScoped<IJobApplicationService, JobApplicationService>();
+
+            // Register WPF services
+            services.AddSingleton<IDialogService, DialogService>();
+            services.AddSingleton<IScopedRunner, ScopedRunner>();
 
             // Register ViewModels
             services.AddTransient<MainViewModel>();
