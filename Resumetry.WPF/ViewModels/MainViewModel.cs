@@ -8,17 +8,15 @@ namespace Resumetry.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IJobApplicationService _jobApplicationService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private string _filterText = string.Empty;
         private ObservableCollection<JobApplicationViewModel> _jobApplications;
         private ObservableCollection<JobApplicationViewModel> _filteredJobApplications;
         private JobApplicationViewModel? _selectedJobApplication;
 
-        public MainViewModel(IServiceProvider serviceProvider, IJobApplicationService jobApplicationService)
+        public MainViewModel(IServiceScopeFactory serviceScopeFactory)
         {
-            _serviceProvider = serviceProvider;
-            _jobApplicationService = jobApplicationService;
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _jobApplications = [];
             _filteredJobApplications = [];
 
@@ -79,7 +77,10 @@ namespace Resumetry.ViewModels
 
             try
             {
-                var summaryDtos = await _jobApplicationService.GetAllAsync();
+                using var scope = _serviceScopeFactory.CreateScope();
+                var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
+
+                var summaryDtos = await jobApplicationService.GetAllAsync();
 
                 foreach (var summaryDto in summaryDtos)
                 {
@@ -115,7 +116,8 @@ namespace Resumetry.ViewModels
 
         private void OpenNewApplicationForm()
         {
-            var formViewModel = _serviceProvider.GetRequiredService<ApplicationFormViewModel>();
+            using var scope = _serviceScopeFactory.CreateScope();
+            var formViewModel = scope.ServiceProvider.GetRequiredService<ApplicationFormViewModel>();
             var formWindow = new ApplicationFormWindow(formViewModel);
             if (formWindow.ShowDialog() == true)
             {
@@ -136,8 +138,12 @@ namespace Resumetry.ViewModels
 
             try
             {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
+                var formViewModel = scope.ServiceProvider.GetRequiredService<ApplicationFormViewModel>();
+
                 // Load the full job application detail DTO
-                var detailDto = await _jobApplicationService.GetByIdAsync(SelectedJobApplication.Id);
+                var detailDto = await jobApplicationService.GetByIdAsync(SelectedJobApplication.Id);
                 if (detailDto == null)
                 {
                     System.Windows.MessageBox.Show("Job application not found.",
@@ -147,7 +153,6 @@ namespace Resumetry.ViewModels
                     return;
                 }
 
-                var formViewModel = _serviceProvider.GetRequiredService<ApplicationFormViewModel>();
                 formViewModel.LoadExistingJobApplication(detailDto);
 
                 var formWindow = new ApplicationFormWindow(formViewModel);
@@ -170,18 +175,16 @@ namespace Resumetry.ViewModels
         {
             if (SelectedJobApplication == null) return;
 
-            var result = System.Windows.MessageBox.Show(
-                $"Are you sure you want to delete the application for {SelectedJobApplication.Company} - {SelectedJobApplication.Position}?\n\nThis action cannot be undone.",
-                "Confirm Delete",
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Warning);
-
-            if (result != System.Windows.MessageBoxResult.Yes) return;
+            if (!ConfirmDelete(SelectedJobApplication))
+                return;
 
             try
             {
+                using var scope = _serviceScopeFactory.CreateScope();
+                var jobApplicationService = scope.ServiceProvider.GetRequiredService<IJobApplicationService>();
+
                 // Delete the job application via service
-                await _jobApplicationService.DeleteAsync(SelectedJobApplication.Id);
+                await jobApplicationService.DeleteAsync(SelectedJobApplication.Id);
 
                 // Refresh the list
                 await LoadJobApplicationsAsync();
@@ -202,6 +205,21 @@ namespace Resumetry.ViewModels
             }
         }
 
+        /// <summary>
+        /// Shows a confirmation dialog for deleting a job application.
+        /// Virtual to allow testing without UI interaction.
+        /// </summary>
+        protected virtual bool ConfirmDelete(JobApplicationViewModel app)
+        {
+            var result = System.Windows.MessageBox.Show(
+                $"Are you sure you want to delete the application for {app.Company} - {app.Position}?\n\nThis action cannot be undone.",
+                "Confirm Delete",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Warning);
+
+            return result == System.Windows.MessageBoxResult.Yes;
+        }
+
         private void OpenReports()
         {
             // TODO: Implement reports functionality
@@ -211,7 +229,8 @@ namespace Resumetry.ViewModels
 
         private void OpenSettings()
         {
-            var settingsViewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
+            using var scope = _serviceScopeFactory.CreateScope();
+            var settingsViewModel = scope.ServiceProvider.GetRequiredService<SettingsViewModel>();
             var settingsWindow = new SettingsWindow(settingsViewModel);
             settingsWindow.ShowDialog();
 
