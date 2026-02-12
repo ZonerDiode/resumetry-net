@@ -28,7 +28,7 @@
 
     <Window.Resources>
         <converters:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
 
     <Grid>
