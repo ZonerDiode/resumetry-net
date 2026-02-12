@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Resumetry.Views"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
-        xmlns:converters="clr-namespace:Resumetry.Converters" 
+        xmlns:converters="clr-namespace:Resumetry.Converters"
+        xmlns:helpers="clr-namespace:Resumetry.Helpers" 
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="1200" Width="1100"
         WindowStartupLocation="CenterScreen"
@@ -103,27 +104,8 @@
                                 <TextBlock Text="Recruiter Name" Style="{StaticResource FormLabelStyle}"/>
                                 <TextBox Text="{Binding RecruiterName, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource ModernTextBoxStyle}"
-                                         Height="36">
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                            <Style.Triggers>
-                                                <Trigger Property="Text" Value="">
-                                                    <Setter Property="Background">
-                                                        <Setter.Value>
-                                                            <VisualBrush Stretch="None" AlignmentX="Left">
-                                                                <VisualBrush.Visual>
-                                                                    <TextBlock Text="e.g., Jane Smith"
-                                                                               Foreground="#999"
-                                                                               Margin="8,0,0,0"/>
-                                                                </VisualBrush.Visual>
-                                                            </VisualBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
+                                         helpers:WatermarkHelper.Watermark="e.g., Jane Smith"
+                                         Height="36"/>
                             </StackPanel>
 
                             <!-- Recruiter Company -->
@@ -131,27 +113,8 @@
                                 <TextBlock Text="Recruiter Company" Style="{StaticResource FormLabelStyle}"/>
                                 <TextBox Text="{Binding RecruiterCompany, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource ModernTextBoxStyle}"
-                                         Height="36">
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                            <Style.Triggers>
-                                                <Trigger Property="Text" Value="">
-                                                    <Setter Property="Background">
-                                                        <Setter.Value>
-                                                            <VisualBrush Stretch="None" AlignmentX="Left">
-                                                                <VisualBrush.Visual>
-                                                                    <TextBlock Text="e.g., Acme Recruiting"
-                                                                               Foreground="#999"
-                                                                               Margin="8,0,0,0"/>
-                                                                </VisualBrush.Visual>
-                                                            </VisualBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
+                                         helpers:WatermarkHelper.Watermark="e.g., Acme Recruiting"
+                                         Height="36"/>
                             </StackPanel>
 
                             <!-- Bottom Row: Applied Date, Salary, Top Job -->
@@ -177,27 +140,8 @@
                                     <TextBlock Text="Salary" Style="{StaticResource FormLabelStyle}"/>
                                     <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource ModernTextBoxStyle}"
-                                             Height="36">
-                                        <TextBox.Resources>
-                                            <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                                <Style.Triggers>
-                                                    <Trigger Property="Text" Value="">
-                                                        <Setter Property="Background">
-                                                            <Setter.Value>
-                                                                <VisualBrush Stretch="None" AlignmentX="Left">
-                                                                    <VisualBrush.Visual>
-                                                                        <TextBlock Text="e.g., $80,000 - $100,000"
-                                                                                   Foreground="#999"
-                                                                                   Margin="8,0,0,0"/>
-                                                                    </VisualBrush.Visual>
-                                                                </VisualBrush>
-                                                            </Setter.Value>
-                                                        </Setter>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Resources>
-                                    </TextBox>
+                                             helpers:WatermarkHelper.Watermark="e.g., $80,000 - $100,000"
+                                             Height="36"/>
                                 </StackPanel>
 
                                 <!-- Mark as Top Job -->
@@ -400,27 +344,8 @@
                                                                  AcceptsReturn="True"
                                                                  Height="80"
                                                                  VerticalScrollBarVisibility="Auto"
-                                                                 Style="{StaticResource ModernTextBoxStyle}">
-                                                            <TextBox.Resources>
-                                                                <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                                                    <Style.Triggers>
-                                                                        <Trigger Property="Text" Value="">
-                                                                            <Setter Property="Background">
-                                                                                <Setter.Value>
-                                                                                    <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
-                                                                                        <VisualBrush.Visual>
-                                                                                            <TextBlock Text="What happened on this date..."
-                                                                                                       Foreground="#999"
-                                                                                                       Margin="8,8,0,0"/>
-                                                                                        </VisualBrush.Visual>
-                                                                                    </VisualBrush>
-                                                                                </Setter.Value>
-                                                                            </Setter>
-                                                                        </Trigger>
-                                                                    </Style.Triggers>
-                                                                </Style>
-                                                            </TextBox.Resources>
-                                                        </TextBox>
+                                                                 Style="{StaticResource ModernTextBoxStyle}"
+                                                                 helpers:WatermarkHelper.Watermark="What happened on this date..."/>
                                                     </StackPanel>
                                                 </Grid>
                                             </Border>
@@ -454,27 +379,8 @@
                                 <TextBlock Text="Source Page URL" Style="{StaticResource FormLabelStyle}"/>
                                 <TextBox Text="{Binding SourcePageUrl, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource ModernTextBoxStyle}"
-                                         Height="36">
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                            <Style.Triggers>
-                                                <Trigger Property="Text" Value="">
-                                                    <Setter Property="Background">
-                                                        <Setter.Value>
-                                                            <VisualBrush Stretch="None" AlignmentX="Left">
-                                                                <VisualBrush.Visual>
-                                                                    <TextBlock Text="https://..."
-                                                                               Foreground="#999"
-                                                                               Margin="8,0,0,0"/>
-                                                                </VisualBrush.Visual>
-                                                            </VisualBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
+                                         helpers:WatermarkHelper.Watermark="https://..."
+                                         Height="36"/>
                             </StackPanel>
 
                             <!-- Review Page URL -->
@@ -482,27 +388,8 @@
                                 <TextBlock Text="Review Page URL" Style="{StaticResource FormLabelStyle}"/>
                                 <TextBox Text="{Binding ReviewPageUrl, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource ModernTextBoxStyle}"
-                                         Height="36">
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                            <Style.Triggers>
-                                                <Trigger Property="Text" Value="">
-                                                    <Setter Property="Background">
-                                                        <Setter.Value>
-                                                            <VisualBrush Stretch="None" AlignmentX="Left">
-                                                                <VisualBrush.Visual>
-                                                                    <TextBlock Text="https://..."
-                                                                               Foreground="#999"
-                                                                               Margin="8,0,0,0"/>
-                                                                </VisualBrush.Visual>
-                                                            </VisualBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
+                                         helpers:WatermarkHelper.Watermark="https://..."
+                                         Height="36"/>
                             </StackPanel>
 
                             <!-- Login Hints -->
@@ -513,27 +400,8 @@
                                          AcceptsReturn="True"
                                          Height="40"
                                          VerticalScrollBarVisibility="Auto"
-                                         Style="{StaticResource ModernTextBoxStyle}">
-                                    <TextBox.Resources>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                            <Style.Triggers>
-                                                <Trigger Property="Text" Value="">
-                                                    <Setter Property="Background">
-                                                        <Setter.Value>
-                                                            <VisualBrush Stretch="None" AlignmentX="Left" AlignmentY="Top">
-                                                                <VisualBrush.Visual>
-                                                                    <TextBlock Text="Notes about accessing the company portal..."
-                                                                               Foreground="#999"
-                                                                               Margin="8,8,0,0"/>
-                                                                </VisualBrush.Visual>
-                                                            </VisualBrush>
-                                                        </Setter.Value>
-                                                    </Setter>
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Resources>
-                                </TextBox>
+                                         Style="{StaticResource ModernTextBoxStyle}"
+                                         helpers:WatermarkHelper.Watermark="Notes about accessing the company portal..."/>
                             </StackPanel>
 
                             <!-- Description -->

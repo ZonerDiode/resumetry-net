@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:Resumetry"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
         xmlns:converters="clr-namespace:Resumetry.Converters"
+        xmlns:helpers="clr-namespace:Resumetry.Helpers"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         mc:Ignorable="d"
@@ -144,31 +145,12 @@
                         <!-- Filter TextBox -->
                         <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource ModernTextBoxStyle}"
+                                 helpers:WatermarkHelper.Watermark="Filter by company..."
                                  Width="300"
                                  Height="36"
                                  VerticalContentAlignment="Center"
-                                 Margin="0,0,8,0" ToolTip="Filter by company">
-                            <TextBox.Resources>
-                                <Style TargetType="TextBox" BasedOn="{StaticResource ModernTextBoxStyle}">
-                                    <Style.Triggers>
-                                        <Trigger Property="Text" Value="">
-                                            <Setter Property="Background">
-                                                <Setter.Value>
-                                                    <VisualBrush Stretch="None" AlignmentX="Left">
-                                                        <VisualBrush.Visual>
-                                                            <TextBlock Text="Filter by company..."
-                                                                       Foreground="#999"
-                                                                       Margin="8,0,0,0"
-                                                                       FontSize="14"/>
-                                                        </VisualBrush.Visual>
-                                                    </VisualBrush>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBox.Resources>
-                        </TextBox>
+                                 Margin="0,0,8,0"
+                                 ToolTip="Filter by company"/>
 
                         <!-- Action Buttons -->
                         <Button Content="+ New Application"
