@@ -120,12 +120,12 @@ namespace Resumetry.ViewModels
 
         private async void OpenEditApplicationForm()
         {
-            if (SelectedJobApplication == null || !SelectedJobApplication.Id.HasValue) return;
+            if (SelectedJobApplication == null) return;
 
             try
             {
                 // Load the full job application with all related data
-                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id.Value);
+                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id);
                 if (jobApplication == null)
                 {
                     System.Windows.MessageBox.Show("Job application not found.",
@@ -156,7 +156,7 @@ namespace Resumetry.ViewModels
 
         private async void DeleteApplication()
         {
-            if (SelectedJobApplication == null || !SelectedJobApplication.Id.HasValue) return;
+            if (SelectedJobApplication == null) return;
 
             var result = System.Windows.MessageBox.Show(
                 $"Are you sure you want to delete the application for {SelectedJobApplication.Company} - {SelectedJobApplication.Position}?\n\nThis action cannot be undone.",
@@ -169,7 +169,7 @@ namespace Resumetry.ViewModels
             try
             {
                 // Load the full job application
-                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id.Value);
+                var jobApplication = await _unitOfWork.JobApplications.GetByIdAsync(SelectedJobApplication.Id);
                 if (jobApplication == null)
                 {
                     System.Windows.MessageBox.Show("Job application not found.",

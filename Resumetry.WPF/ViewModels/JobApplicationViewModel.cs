@@ -12,7 +12,7 @@ namespace Resumetry.ViewModels
             _jobApplication = jobApplication;
         }
 
-        public Guid? Id => _jobApplication.Id;
+        public Guid Id => _jobApplication.Id;
         public string Company => _jobApplication.Company;
         public string Position => _jobApplication.Position;
         public string? Salary => _jobApplication.Salary;

@@ -9,9 +9,6 @@ namespace Resumetry.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<StatusItem> builder)
         {
-            builder.Property<Guid?>("Id")
-                .ValueGeneratedOnAdd(); 
-
             builder.HasKey(si => si.Id);
 
             builder.Property(si => si.Occurred)

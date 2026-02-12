@@ -46,6 +46,7 @@ namespace Resumetry
 
             // Register services
             services.AddScoped<IImportService, ImportService>();
+            services.AddScoped<IJobApplicationService, JobApplicationService>();
 
             // Register ViewModels
             services.AddTransient<MainViewModel>();

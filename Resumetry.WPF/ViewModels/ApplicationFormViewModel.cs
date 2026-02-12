@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Entities;
 using Resumetry.Domain.Enums;
@@ -61,6 +62,7 @@ namespace Resumetry.ViewModels
     public class ApplicationFormViewModel : ViewModelBase
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IJobApplicationService _jobApplicationService;
         private Guid? _existingId;
         private string _company = string.Empty;
         private string _role = string.Empty;
@@ -74,9 +76,10 @@ namespace Resumetry.ViewModels
         private string _loginHints = string.Empty;
         private string _description = string.Empty;
 
-        public ApplicationFormViewModel(IUnitOfWork unitOfWork)
+        public ApplicationFormViewModel(IUnitOfWork unitOfWork, IJobApplicationService jobApplicationService)
         {
             _unitOfWork = unitOfWork;
+            _jobApplicationService = jobApplicationService;
             StatusItems = [];
             ApplicationEvents = [];
 
@@ -267,197 +270,81 @@ namespace Resumetry.ViewModels
         {
             try
             {
+                // Build recruiter DTO if provided
+                RecruiterDto? recruiterDto = null;
+                if (!string.IsNullOrWhiteSpace(RecruiterName))
+                {
+                    recruiterDto = new RecruiterDto(
+                        Name: RecruiterName,
+                        Company: string.IsNullOrWhiteSpace(RecruiterCompany) ? null : RecruiterCompany);
+                }
+
+                // Build status items DTOs
+                var statusItemDtos = StatusItems
+                    .Select(s => new StatusItemDto(s.Occurred, s.Status, s.Id))
+                    .ToList();
+
+                // Build application events DTOs (exclude empty descriptions)
+                var eventDtos = ApplicationEvents
+                    .Where(e => !string.IsNullOrWhiteSpace(e.Description))
+                    .Select(e => new ApplicationEventDto(e.Occurred, e.Description, e.Id))
+                    .ToList();
+
                 if (IsEditMode && _existingId.HasValue)
                 {
-                    // Load the existing entity
-                    var existingJobApp = await _unitOfWork.JobApplications.GetByIdAsync(_existingId.Value);
-                    if (existingJobApp == null)
-                    {
-                        System.Windows.MessageBox.Show("Job application not found.",
-                            "Error",
-                            System.Windows.MessageBoxButton.OK,
-                            System.Windows.MessageBoxImage.Error);
-                        return false;
-                    }
+                    // Update existing application
+                    var updateDto = new UpdateJobApplicationDto(
+                        Id: _existingId.Value,
+                        Company: Company,
+                        Position: Role,
+                        Description: string.IsNullOrWhiteSpace(Description) ? null : Description,
+                        Salary: string.IsNullOrWhiteSpace(Salary) ? null : Salary,
+                        TopJob: MarkAsTopJob,
+                        SourcePage: string.IsNullOrWhiteSpace(SourcePageUrl) ? null : SourcePageUrl,
+                        ReviewPage: string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl,
+                        LoginNotes: string.IsNullOrWhiteSpace(LoginHints) ? null : LoginHints,
+                        Recruiter: recruiterDto,
+                        StatusItems: statusItemDtos,
+                        ApplicationEvents: eventDtos);
 
-                    // Update scalar properties
-                    existingJobApp.Company = Company;
-                    existingJobApp.Position = Role;
-                    existingJobApp.Description = string.IsNullOrWhiteSpace(Description) ? null : Description;
-                    existingJobApp.Salary = string.IsNullOrWhiteSpace(Salary) ? null : Salary;
-                    existingJobApp.TopJob = MarkAsTopJob;
-                    existingJobApp.SourcePage = string.IsNullOrWhiteSpace(SourcePageUrl) ? null : SourcePageUrl;
-                    existingJobApp.ReviewPage = string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl;
-                    existingJobApp.LoginNotes = string.IsNullOrWhiteSpace(LoginHints) ? null : LoginHints;
-
-                    // Update or create recruiter
-                    if (!string.IsNullOrWhiteSpace(RecruiterName))
-                    {
-                        if (existingJobApp.Recruiter != null)
-                        {
-                            existingJobApp.Recruiter.Name = RecruiterName;
-                            existingJobApp.Recruiter.Company = string.IsNullOrWhiteSpace(RecruiterCompany) ? null : RecruiterCompany;
-                        }
-                        else
-                        {
-                            existingJobApp.Recruiter = new Recruiter
-                            {
-                                Name = RecruiterName,
-                                Company = string.IsNullOrWhiteSpace(RecruiterCompany) ? null : RecruiterCompany,
-                                Email = null,
-                                Phone = null
-                            };
-                        }
-                    }
-                    else
-                    {
-                        existingJobApp.Recruiter = null;
-                    }
-
-                    // Update status items
-                    var existingStatusIds = existingJobApp.StatusItems.Where(s => s.Id.HasValue).Select(s => s.Id!.Value).ToHashSet();
-                    var currentStatusIds = StatusItems.Where(s => s.Id.HasValue).Select(s => s.Id!.Value).ToHashSet();
-
-                    // Remove deleted status items
-                    var statusItemsToRemove = existingJobApp.StatusItems
-                        .Where(s => s.Id.HasValue && !currentStatusIds.Contains(s.Id.Value))
-                        .ToList();
-                    foreach (var item in statusItemsToRemove)
-                    {
-                        existingJobApp.StatusItems.Remove(item);
-                    }
-
-                    // Update existing and add new status items
-                    foreach (var statusVm in StatusItems)
-                    {
-                        if (statusVm.Id.HasValue)
-                        {
-                            // Update existing
-                            var existing = existingJobApp.StatusItems.FirstOrDefault(s => s.Id.HasValue && s.Id.Value == statusVm.Id.Value);
-                            if (existing != null)
-                            {
-                                existing.Occurred = statusVm.Occurred;
-                                existing.Status = statusVm.Status;
-                            }
-                        }
-                        else
-                        {
-                            // Add new
-                            existingJobApp.StatusItems.Add(new StatusItem
-                            {
-                                Occurred = statusVm.Occurred,
-                                Status = statusVm.Status
-                            });
-                        }
-                    }
-
-                    // Update application events
-                    var existingEventIds = existingJobApp.ApplicationEvents.Where(e => e.Id.HasValue).Select(e => e.Id!.Value).ToHashSet();
-                    var currentEventIds = ApplicationEvents.Where(e => e.Id.HasValue).Select(e => e.Id!.Value).ToHashSet();
-
-                    // Remove deleted events
-                    var eventsToRemove = existingJobApp.ApplicationEvents
-                        .Where(e => e.Id.HasValue && !currentEventIds.Contains(e.Id.Value))
-                        .ToList();
-                    foreach (var item in eventsToRemove)
-                    {
-                        existingJobApp.ApplicationEvents.Remove(item);
-                    }
-
-                    // Update existing and add new events
-                    foreach (var eventVm in ApplicationEvents)
-                    {
-                        if (!string.IsNullOrWhiteSpace(eventVm.Description))
-                        {
-                            if (eventVm.Id.HasValue)
-                            {
-                                // Update existing
-                                var existing = existingJobApp.ApplicationEvents.FirstOrDefault(e => e.Id.HasValue && e.Id.Value == eventVm.Id.Value);
-                                if (existing != null)
-                                {
-                                    existing.Occurred = eventVm.Occurred;
-                                    existing.Description = eventVm.Description;
-                                }
-                            }
-                            else
-                            {
-                                // Add new
-                                existingJobApp.ApplicationEvents.Add(new ApplicationEvent
-                                {
-                                    Occurred = eventVm.Occurred,
-                                    Description = eventVm.Description
-                                });
-                            }
-                        }
-                    }
-
-                    _unitOfWork.JobApplications.Update(existingJobApp);
-                    await _unitOfWork.SaveChangesAsync();
-
-                    return true;
+                    await _jobApplicationService.UpdateAsync(updateDto);
                 }
                 else
                 {
-                    // Create new job application
-                    // Create recruiter if provided
-                    Recruiter? recruiter = null;
-                    if (!string.IsNullOrWhiteSpace(RecruiterName))
-                    {
-                        recruiter = new Recruiter
-                        {
-                            Name = RecruiterName,
-                            Company = string.IsNullOrWhiteSpace(RecruiterCompany) ? null : RecruiterCompany,
-                            Email = null,
-                            Phone = null
-                        };
-                    }
+                    // Create new application
+                    var createDto = new CreateJobApplicationDto(
+                        Company: Company,
+                        Position: Role,
+                        Description: string.IsNullOrWhiteSpace(Description) ? null : Description,
+                        Salary: string.IsNullOrWhiteSpace(Salary) ? null : Salary,
+                        TopJob: MarkAsTopJob,
+                        SourcePage: string.IsNullOrWhiteSpace(SourcePageUrl) ? null : SourcePageUrl,
+                        ReviewPage: string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl,
+                        LoginNotes: string.IsNullOrWhiteSpace(LoginHints) ? null : LoginHints,
+                        Recruiter: recruiterDto,
+                        StatusItems: statusItemDtos,
+                        ApplicationEvents: eventDtos);
 
-                    // Create status items
-                    var statusItems = new List<StatusItem>();
-                    foreach (var statusVm in StatusItems)
-                    {
-                        statusItems.Add(new StatusItem
-                        {
-                            Occurred = statusVm.Occurred,
-                            Status = statusVm.Status
-                        });
-                    }
-
-                    // Create application events
-                    var applicationEvents = new List<ApplicationEvent>();
-                    foreach (var eventVm in ApplicationEvents)
-                    {
-                        if (!string.IsNullOrWhiteSpace(eventVm.Description))
-                        {
-                            applicationEvents.Add(new ApplicationEvent
-                            {
-                                Occurred = eventVm.Occurred,
-                                Description = eventVm.Description
-                            });
-                        }
-                    }
-
-                    // Create job application
-                    var jobApplication = new JobApplication
-                    {
-                        Company = Company,
-                        Position = Role,
-                        Description = string.IsNullOrWhiteSpace(Description) ? null : Description,
-                        Salary = string.IsNullOrWhiteSpace(Salary) ? null : Salary,
-                        TopJob = MarkAsTopJob,
-                        SourcePage = string.IsNullOrWhiteSpace(SourcePageUrl) ? null : SourcePageUrl,
-                        ReviewPage = string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl,
-                        LoginNotes = string.IsNullOrWhiteSpace(LoginHints) ? null : LoginHints,
-                        Recruiter = recruiter,
-                        ApplicationEvents = applicationEvents,
-                        StatusItems = statusItems
-                    };
-
-                    await _unitOfWork.JobApplications.AddAsync(jobApplication);
-                    await _unitOfWork.SaveChangesAsync();
-
-                    return true;
+                    await _jobApplicationService.CreateAsync(createDto);
                 }
+
+                return true;
+            }
+            catch (KeyNotFoundException)
+            {
+                System.Windows.MessageBox.Show("Job application not found.",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return false;
+            }
+            catch (ArgumentException ex)
+            {
+                System.Windows.MessageBox.Show($"Validation error: {ex.Message}",
+                    "Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
+                return false;
             }
             catch (Exception ex)
             {
