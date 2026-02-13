@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Input;
 using FluentAssertions;
 using Moq;
 using Resumetry.Application.DTOs;
@@ -42,29 +43,7 @@ public class MainViewModelScopeTests
     }
 
     [Fact]
-    public void Constructor_WithNullScopedRunner_ThrowsArgumentNullException()
-    {
-        // Arrange & Act
-        Action act = () => new MainViewModel(null!, _mockDialogService.Object);
-
-        // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("scopedRunner");
-    }
-
-    [Fact]
-    public void Constructor_WithNullDialogService_ThrowsArgumentNullException()
-    {
-        // Arrange & Act
-        Action act = () => new MainViewModel(_mockScopedRunner.Object, null!);
-
-        // Assert
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("dialogService");
-    }
-
-    [Fact]
-    public async Task Constructor_LoadsInitialData_UsingScopedRunner()
+    public async Task LoadJobApplicationsCommand_LoadsData_UsingScopedRunner()
     {
         // Arrange
         var summaryDtos = new List<JobApplicationSummaryDto>
@@ -88,29 +67,23 @@ public class MainViewModelScopeTests
 
         // Act
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
         _mockScopedRunner.Verify(
             r => r.RunAsync<IJobApplicationService, IEnumerable<JobApplicationSummaryDto>>(
                 It.IsAny<Func<IJobApplicationService, Task<IEnumerable<JobApplicationSummaryDto>>>>()),
-            Times.AtLeastOnce());
+            Times.Once());
     }
 
     [Fact]
-    public async Task RefreshCommand_CallsScopedRunner()
+    public async Task LoadJobApplicationsCommand_CallsScopedRunner()
     {
         // Arrange
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
-
-        _mockScopedRunner.Invocations.Clear();
 
         // Act
-        var refreshCommand = viewModel.RefreshCommand as AsyncRelayCommand;
-        refreshCommand!.Execute(null);
-        if (refreshCommand.RunningTask != null)
-            await refreshCommand.RunningTask;
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
         _mockScopedRunner.Verify(
@@ -154,7 +127,7 @@ public class MainViewModelScopeTests
 
         // Act
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
         viewModel.FilteredJobApplications.Should().HaveCount(2);
@@ -173,14 +146,14 @@ public class MainViewModelScopeTests
 
         // Act
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(150); // Give constructor's initial load time to complete and error to be handled
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
         _mockDialogService.Verify(
             d => d.ShowError(
                 It.Is<string>(s => s.Contains("Test error")),
                 It.IsAny<string>()),
-            Times.AtLeastOnce());
+            Times.Once());
     }
 
     [Fact]
@@ -212,16 +185,13 @@ public class MainViewModelScopeTests
             .Returns(false); // User cancels
 
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Select the first application
         viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
 
         // Act
-        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
-        deleteCommand!.Execute(null);
-        if (deleteCommand.RunningTask != null)
-            await deleteCommand.RunningTask;
+        await viewModel.DeleteApplicationCommand.ExecuteAsync(null);
 
         // Assert
         _mockDialogService.Verify(
@@ -265,7 +235,7 @@ public class MainViewModelScopeTests
             .Returns(true); // User confirms
 
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Select the first application
         viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
@@ -273,10 +243,7 @@ public class MainViewModelScopeTests
         _mockScopedRunner.Invocations.Clear();
 
         // Act
-        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
-        deleteCommand!.Execute(null);
-        if (deleteCommand.RunningTask != null)
-            await deleteCommand.RunningTask;
+        await viewModel.DeleteApplicationCommand.ExecuteAsync(null);
 
         // Assert - should call RunAsync for delete and then for refresh
         _mockScopedRunner.Verify(
@@ -319,7 +286,7 @@ public class MainViewModelScopeTests
             .Returns(false); // User cancels
 
         var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
-        await Task.Delay(100); // Give constructor's initial load time to complete
+        await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Select the first application
         viewModel.SelectedJobApplication = viewModel.FilteredJobApplications.First();
@@ -327,10 +294,7 @@ public class MainViewModelScopeTests
         _mockScopedRunner.Invocations.Clear();
 
         // Act
-        var deleteCommand = viewModel.DeleteApplicationCommand as AsyncRelayCommand;
-        deleteCommand!.Execute(null);
-        if (deleteCommand.RunningTask != null)
-            await deleteCommand.RunningTask;
+        await viewModel.DeleteApplicationCommand.ExecuteAsync(null);
 
         // Assert - should NOT call RunAsync for delete (only confirm was called)
         _mockScopedRunner.Verify(

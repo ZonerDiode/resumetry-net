@@ -1,179 +1,94 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Enums;
 
 namespace Resumetry.ViewModels
 {
-    public class StatusItemViewModel : ViewModelBase
+    public partial class StatusItemViewModel : ViewModelBase
     {
+        [ObservableProperty]
         private Guid? _id;
+
+        [ObservableProperty]
         private DateTime _occurred = DateTime.Now;
+
+        [ObservableProperty]
         private StatusEnum _status = StatusEnum.Applied;
-
-        public Guid? Id
-        {
-            get => _id;
-            set => SetProperty(ref _id, value);
-        }
-
-        public DateTime Occurred
-        {
-            get => _occurred;
-            set => SetProperty(ref _occurred, value);
-        }
-
-        public StatusEnum Status
-        {
-            get => _status;
-            set => SetProperty(ref _status, value);
-        }
 
         public StatusEnum[] AvailableStatuses => Enum.GetValues<StatusEnum>();
     }
 
-    public class ApplicationEventViewModel : ViewModelBase
+    public partial class ApplicationEventViewModel : ViewModelBase
     {
+        [ObservableProperty]
         private Guid? _id;
+
+        [ObservableProperty]
         private DateTime _occurred = DateTime.Now;
+
+        [ObservableProperty]
         private string _description = string.Empty;
-
-        public Guid? Id
-        {
-            get => _id;
-            set => SetProperty(ref _id, value);
-        }
-
-        public DateTime Occurred
-        {
-            get => _occurred;
-            set => SetProperty(ref _occurred, value);
-        }
-
-        public string Description
-        {
-            get => _description;
-            set => SetProperty(ref _description, value);
-        }
     }
 
-    public class ApplicationFormViewModel : ViewModelBase
+    public partial class ApplicationFormViewModel(IJobApplicationService jobApplicationService) : ViewModelBase
     {
-        private readonly IJobApplicationService _jobApplicationService;
-        private Guid? _existingId;
-        private string _company = string.Empty;
-        private string _role = string.Empty;
-        private string _recruiterName = string.Empty;
-        private string _recruiterCompany = string.Empty;
-        private DateTime _createdAt = DateTime.Now;
-        private string _salary = string.Empty;
-        private bool _markAsTopJob;
-        private string _sourcePageUrl = string.Empty;
-        private string _reviewPageUrl = string.Empty;
-        private string _loginHints = string.Empty;
-        private string _description = string.Empty;
-
-        public ApplicationFormViewModel(IJobApplicationService jobApplicationService)
-        {
-            _jobApplicationService = jobApplicationService;
-
-            AddStatusCommand = new RelayCommand(_ => AddStatus());
-            RemoveStatusCommand = new RelayCommand(item => RemoveStatus(item as StatusItemViewModel));
-            AddNoteCommand = new RelayCommand(_ => AddNote());
-            RemoveNoteCommand = new RelayCommand(item => RemoveNote(item as ApplicationEventViewModel));
-
-            // Add initial status item for new applications
-            AddStatus();
-        }
-
-        public bool IsEditMode => _existingId.HasValue;
+        public bool IsEditMode => ExistingId.HasValue;
         public string WindowTitle => IsEditMode ? "Edit Application" : "New Application";
         public string SaveButtonText => IsEditMode ? "Save" : "Create";
-
-        public string Company
-        {
-            get => _company;
-            set => SetProperty(ref _company, value);
-        }
-
-        public string Role
-        {
-            get => _role;
-            set => SetProperty(ref _role, value);
-        }
-
-        public string RecruiterName
-        {
-            get => _recruiterName;
-            set => SetProperty(ref _recruiterName, value);
-        }
-
-        public string RecruiterCompany
-        {
-            get => _recruiterCompany;
-            set => SetProperty(ref _recruiterCompany, value);
-        }
-
-        public DateTime CreatedAt
-        {
-            get => _createdAt;
-            set => SetProperty(ref _createdAt, value);
-        }
-
-        public string Salary
-        {
-            get => _salary;
-            set => SetProperty(ref _salary, value);
-        }
-
-        public bool MarkAsTopJob
-        {
-            get => _markAsTopJob;
-            set => SetProperty(ref _markAsTopJob, value);
-        }
-
-        public string SourcePageUrl
-        {
-            get => _sourcePageUrl;
-            set => SetProperty(ref _sourcePageUrl, value);
-        }
-
-        public string ReviewPageUrl
-        {
-            get => _reviewPageUrl;
-            set => SetProperty(ref _reviewPageUrl, value);
-        }
-
-        public string LoginHints
-        {
-            get => _loginHints;
-            set => SetProperty(ref _loginHints, value);
-        }
-
-        public string Description
-        {
-            get => _description;
-            set => SetProperty(ref _description, value);
-        }
 
         public ObservableCollection<StatusItemViewModel> StatusItems { get; } = [];
         public ObservableCollection<ApplicationEventViewModel> ApplicationEvents { get; } = [];
 
-        public ICommand AddStatusCommand { get; }
-        public ICommand RemoveStatusCommand { get; } 
-        public ICommand AddNoteCommand { get; }
-        public ICommand RemoveNoteCommand { get; }
-
         public int StatusCount => StatusItems.Count;
         public int NotesCount => ApplicationEvents.Count;
 
+        [ObservableProperty]
+        private Guid? _existingId;
+
+        [ObservableProperty]
+        private string _company = string.Empty;
+
+        [ObservableProperty]
+        private string _role = string.Empty;
+
+        [ObservableProperty]
+        private string _recruiterName = string.Empty;
+
+        [ObservableProperty]
+        private string _recruiterCompany = string.Empty;
+
+        [ObservableProperty]
+        private DateTime _createdAt = DateTime.Now;
+
+        [ObservableProperty]
+        private string _salary = string.Empty;
+
+        [ObservableProperty]
+        private bool _markAsTopJob;
+
+        [ObservableProperty]
+        private string _sourcePageUrl = string.Empty;
+
+        [ObservableProperty]
+        private string _reviewPageUrl = string.Empty;
+
+        [ObservableProperty]
+        private string _loginHints = string.Empty;
+
+        [ObservableProperty]
+        private string _description = string.Empty;
+
+        [RelayCommand]
         private void AddStatus()
         {
             StatusItems.Add(new StatusItemViewModel { Occurred = DateTime.Now });
             OnPropertyChanged(nameof(StatusCount));
         }
 
+        [RelayCommand]
         private void RemoveStatus(StatusItemViewModel? item)
         {
             if (item != null)
@@ -183,12 +98,14 @@ namespace Resumetry.ViewModels
             }
         }
 
+        [RelayCommand]
         private void AddNote()
         {
             ApplicationEvents.Add(new ApplicationEventViewModel { Occurred = DateTime.Now });
             OnPropertyChanged(nameof(NotesCount));
         }
 
+        [RelayCommand]
         private void RemoveNote(ApplicationEventViewModel? item)
         {
             if (item != null)
@@ -200,7 +117,7 @@ namespace Resumetry.ViewModels
 
         public void LoadExistingJobApplication(JobApplicationDetailDto detailDto)
         {
-            _existingId = detailDto.Id;
+            ExistingId = detailDto.Id;
             Company = detailDto.Company;
             Role = detailDto.Position;
             Salary = detailDto.Salary ?? string.Empty;
@@ -285,11 +202,11 @@ namespace Resumetry.ViewModels
                     .Select(e => new ApplicationEventDto(e.Occurred, e.Description, e.Id))
                     .ToList();
 
-                if (IsEditMode && _existingId.HasValue)
+                if (IsEditMode && ExistingId.HasValue)
                 {
                     // Update existing application
                     var updateDto = new JobApplicationUpdateDto(
-                        Id: _existingId.Value,
+                        Id: ExistingId.Value,
                         Company: Company,
                         Position: Role,
                         Description: string.IsNullOrWhiteSpace(Description) ? null : Description,
@@ -302,7 +219,7 @@ namespace Resumetry.ViewModels
                         StatusItems: statusItemDtos,
                         ApplicationEvents: eventDtos);
 
-                    await _jobApplicationService.UpdateAsync(updateDto);
+                    await jobApplicationService.UpdateAsync(updateDto);
                 }
                 else
                 {
@@ -320,7 +237,7 @@ namespace Resumetry.ViewModels
                         StatusItems: statusItemDtos,
                         ApplicationEvents: eventDtos);
 
-                    await _jobApplicationService.CreateAsync(createDto);
+                    await jobApplicationService.CreateAsync(createDto);
                 }
 
                 return true;

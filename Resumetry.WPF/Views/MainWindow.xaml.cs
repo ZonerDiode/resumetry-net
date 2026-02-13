@@ -18,6 +18,11 @@ namespace Resumetry
             DataContext = viewModel;
         }
 
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            await ViewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
+        }
+
         private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel.SelectedJobApplication != null)

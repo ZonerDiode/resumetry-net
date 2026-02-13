@@ -17,7 +17,8 @@
         Icon="/favicon.ico"
         WindowStyle="None"
         ResizeMode="CanResize"
-        AllowsTransparency="False" RenderTransformOrigin="0.5,0.5">
+        AllowsTransparency="False" RenderTransformOrigin="0.5,0.5"
+        Loaded="MainWindow_OnLoaded">
 
     <!-- Keep resize, shadow and custom caption area -->
     <WindowChrome.WindowChrome>

@@ -1,34 +1,20 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Interfaces;
-using System.Windows.Input;
 
 namespace Resumetry.ViewModels
 {
-    public class SettingsViewModel : ViewModelBase
+    public partial class SettingsViewModel(IImportService importService, IUnitOfWork unitOfWork) : ViewModelBase
     {
-        private readonly IImportService _importService;
-        private readonly IUnitOfWork _unitOfWork;
+
+        [ObservableProperty]
         private string _statusMessage = string.Empty;
 
-        public SettingsViewModel(IImportService importService, IUnitOfWork unitOfWork)
-        {
-            _importService = importService;
-            _unitOfWork = unitOfWork;
+        private bool CanExport() => false;
 
-            ImportFromJsonCommand = new AsyncRelayCommand(ImportFromJsonAsync);
-            ExportToJsonCommand = new RelayCommand(_ => ExportToJson(), _ => false); // Disabled for now
-        }
-
-        public string StatusMessage
-        {
-            get => _statusMessage;
-            set => SetProperty(ref _statusMessage, value);
-        }
-
-        public ICommand ImportFromJsonCommand { get; }
-        public ICommand ExportToJsonCommand { get; }
-
+        [RelayCommand]
         private async Task ImportFromJsonAsync()
         {
             var openFileDialog = new OpenFileDialog
@@ -46,17 +32,17 @@ namespace Resumetry.ViewModels
             {
                 StatusMessage = "Importing...";
 
-                var jobApplications = await _importService.ImportFromJsonAsync(openFileDialog.FileName);
+                var jobApplications = await importService.ImportFromJsonAsync(openFileDialog.FileName);
                 var jobApplicationsList = jobApplications.ToList();
 
                 int importedCount = 0;
                 foreach (var jobApplication in jobApplicationsList)
                 {
-                    await _unitOfWork.JobApplications.AddAsync(jobApplication);
+                    await unitOfWork.JobApplications.AddAsync(jobApplication);
                     importedCount++;
                 }
 
-                await _unitOfWork.SaveChangesAsync();
+                await unitOfWork.SaveChangesAsync();
 
                 StatusMessage = $"Successfully imported {importedCount} application(s)";
             }
@@ -70,6 +56,7 @@ namespace Resumetry.ViewModels
             }
         }
 
+        [RelayCommand(CanExecute = nameof(CanExport))]
         private void ExportToJson()
         {
             // Placeholder for future implementation

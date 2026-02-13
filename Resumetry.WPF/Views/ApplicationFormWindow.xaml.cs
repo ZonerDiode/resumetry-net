@@ -133,6 +133,12 @@ namespace Resumetry.Views
         {
             // Initialize WebView2
             await DescriptionWebView.EnsureCoreWebView2Async(null);
+
+            // Add initial status item only for new applications
+            if (ViewModel.StatusItems.Count == 0)
+            {
+                ViewModel.AddStatusCommand.Execute(null);
+            }
         }
     }
 }
