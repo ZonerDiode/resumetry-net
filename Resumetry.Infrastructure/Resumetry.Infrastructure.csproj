@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Resumetry.Domain\Resumetry.Domain.csproj" />
-    <ProjectReference Include="..\Resumetry.Application\Resumetry.Application.csproj" />
   </ItemGroup>
 
 </Project>
