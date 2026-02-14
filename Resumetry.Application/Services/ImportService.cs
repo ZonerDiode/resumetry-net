@@ -6,32 +6,20 @@ using System.Text.Json.Serialization;
 
 namespace Resumetry.Application.Services
 {
-    public class ImportService : IImportService
+    public class ImportService(IFileService fileService) : IImportService
     {
         public async Task<IEnumerable<JobApplication>> ImportFromJsonAsync(string filePath, CancellationToken cancellationToken = default)
         {
-            if (!File.Exists(filePath))
+            if (!await fileService.FileExistsAsync(filePath))
             {
                 throw new FileNotFoundException($"File not found: {filePath}");
             }
 
-            var jsonContent = await File.ReadAllTextAsync(filePath, cancellationToken);
-            var dtos = JsonSerializer.Deserialize<List<JobApplicationDto>>(jsonContent);
+            var jsonContent = await fileService.ReadAllTextAsync(filePath, cancellationToken);
+            var dtos = JsonSerializer.Deserialize<List<JobApplicationDto>>(jsonContent)
+                ?? throw new InvalidOperationException("Failed to deserialize JSON content");
 
-            if (dtos == null)
-            {
-                throw new InvalidOperationException("Failed to deserialize JSON file");
-            }
-
-            var jobApplications = new List<JobApplication>();
-
-            foreach (var dto in dtos)
-            {
-                var jobApplication = MapDtoToEntity(dto);
-                jobApplications.Add(jobApplication);
-            }
-
-            return jobApplications;
+            return [.. dtos.Select(MapDtoToEntity)];
         }
 
         public Task<IEnumerable<JobApplication>> ImportFromCsvAsync(string filePath, CancellationToken cancellationToken = default)
