@@ -3,28 +3,10 @@ using Resumetry.ViewModels;
 namespace Resumetry.WPF.Services;
 
 /// <summary>
-/// Provides dialog and message box functionality.
+/// Provides message box functionality.
 /// </summary>
 public interface IDialogService
 {
-    /// <summary>
-    /// Shows the application form dialog for creating a new job application.
-    /// </summary>
-    /// <returns>True if the dialog was saved; otherwise, false.</returns>
-    bool ShowApplicationForm();
-
-    /// <summary>
-    /// Shows the application form dialog for editing an existing job application.
-    /// </summary>
-    /// <param name="configure">Action to configure the view model before showing the dialog.</param>
-    /// <returns>True if the dialog was saved; otherwise, false.</returns>
-    bool ShowApplicationForm(Action<ApplicationFormViewModel> configure);
-
-    /// <summary>
-    /// Shows the settings dialog.
-    /// </summary>
-    void ShowSettings();
-
     /// <summary>
     /// Shows a confirmation dialog with Yes/No buttons.
     /// </summary>

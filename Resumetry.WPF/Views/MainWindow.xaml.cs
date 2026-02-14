@@ -9,26 +9,11 @@ namespace Resumetry
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainViewModel ViewModel => (MainViewModel)DataContext;
-
-        public MainWindow(MainViewModel viewModel)
+        public MainWindow(ShellViewModel viewModel)
         {
             InitializeComponent();
             UpdateMaximizeGlyph();
             DataContext = viewModel;
-        }
-
-        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
-        {
-            await ViewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
-        }
-
-        private void DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (ViewModel.SelectedJobApplication != null)
-            {
-                ViewModel.OpenEditApplicationFormCommand.Execute(null);
-            }
         }
 
         // Make title bar draggable and support double-click to maximize/restore

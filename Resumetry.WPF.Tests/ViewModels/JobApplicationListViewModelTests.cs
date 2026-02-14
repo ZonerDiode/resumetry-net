@@ -11,18 +11,20 @@ using Xunit;
 namespace Resumetry.WPF.Tests.ViewModels;
 
 /// <summary>
-/// Tests for MainViewModel's proper use of IScopedRunner and IDialogService.
+/// Tests for JobApplicationListViewModel's proper use of IScopedRunner, IDialogService, and INavigationService.
 /// </summary>
-public class MainViewModelScopeTests
+public class JobApplicationListViewModelTests
 {
     private readonly Mock<IScopedRunner> _mockScopedRunner;
     private readonly Mock<IDialogService> _mockDialogService;
+    private readonly Mock<INavigationService> _mockNavigationService;
     private readonly List<JobApplicationSummaryDto> _testSummaryDtos;
 
-    public MainViewModelScopeTests()
+    public JobApplicationListViewModelTests()
     {
         _mockScopedRunner = new Mock<IScopedRunner>();
         _mockDialogService = new Mock<IDialogService>();
+        _mockNavigationService = new Mock<INavigationService>();
         _testSummaryDtos = [];
 
         // Default setup for RunAsync with IJobApplicationService - return empty list
@@ -36,7 +38,7 @@ public class MainViewModelScopeTests
     public void Constructor_WithValidDependencies_DoesNotThrow()
     {
         // Arrange & Act
-        Action act = () => new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        Action act = () => new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
 
         // Assert
         act.Should().NotThrow();
@@ -66,7 +68,7 @@ public class MainViewModelScopeTests
             .ReturnsAsync(summaryDtos);
 
         // Act
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
@@ -80,7 +82,7 @@ public class MainViewModelScopeTests
     public async Task LoadJobApplicationsCommand_CallsScopedRunner()
     {
         // Arrange
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
 
         // Act
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
@@ -126,7 +128,7 @@ public class MainViewModelScopeTests
             .ReturnsAsync(summaryDtos);
 
         // Act
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
@@ -145,7 +147,7 @@ public class MainViewModelScopeTests
             .ThrowsAsync(new Exception("Test error"));
 
         // Act
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Assert
@@ -184,7 +186,7 @@ public class MainViewModelScopeTests
             .Setup(d => d.Confirm(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(false); // User cancels
 
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Select the first application
@@ -234,7 +236,7 @@ public class MainViewModelScopeTests
             .Setup(d => d.Confirm(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(true); // User confirms
 
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Select the first application
@@ -285,7 +287,7 @@ public class MainViewModelScopeTests
             .Setup(d => d.Confirm(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(false); // User cancels
 
-        var viewModel = new MainViewModel(_mockScopedRunner.Object, _mockDialogService.Object);
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
         await viewModel.LoadJobApplicationsCommand.ExecuteAsync(null);
 
         // Select the first application

@@ -55,9 +55,11 @@ namespace Resumetry
             // Register WPF services
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<IScopedRunner, ScopedRunner>();
+            services.AddSingleton<INavigationService, NavigationService>();
 
             // Register ViewModels
-            services.AddTransient<MainViewModel>();
+            services.AddSingleton<ShellViewModel>();
+            services.AddTransient<JobApplicationListViewModel>();
             services.AddTransient<ApplicationFormViewModel>();
             services.AddTransient<SettingsViewModel>();
 
@@ -76,8 +78,21 @@ namespace Resumetry
                 await dbContext.Database.MigrateAsync();
             }
 
+            // Initialize navigation service with shell view model
+            var navigationService = (NavigationService)_host.Services.GetRequiredService<INavigationService>();
+            var shellViewModel = _host.Services.GetRequiredService<ShellViewModel>();
+            navigationService.Initialize(shellViewModel);
+
+            // Register view mappings
+            navigationService.RegisterView<JobApplicationListViewModel, Views.JobApplicationListView>();
+            navigationService.RegisterView<ApplicationFormViewModel, Views.ApplicationFormView>();
+            navigationService.RegisterView<SettingsViewModel, Views.SettingsView>();
+
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
+
+            // Navigate to home view
+            navigationService.NavigateToHome();
 
             base.OnStartup(e);
         }

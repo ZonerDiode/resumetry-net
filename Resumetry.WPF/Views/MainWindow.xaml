@@ -1,24 +1,21 @@
-﻿<Window x:Class="Resumetry.MainWindow"
+<Window x:Class="Resumetry.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Resumetry"
         xmlns:vm="clr-namespace:Resumetry.ViewModels"
-        xmlns:converters="clr-namespace:Resumetry.Converters"
-        xmlns:helpers="clr-namespace:Resumetry.Helpers"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        d:DataContext="{d:DesignInstance Type=vm:ShellViewModel}"
         mc:Ignorable="d"
         Title="Resumetry"
-        Height="768"
+        Height="1200"
         Width="1280"
         WindowStartupLocation="CenterScreen"
         Icon="/favicon.ico"
         WindowStyle="None"
         ResizeMode="CanResize"
-        AllowsTransparency="False" RenderTransformOrigin="0.5,0.5"
-        Loaded="MainWindow_OnLoaded">
+        AllowsTransparency="False" RenderTransformOrigin="0.5,0.5">
 
     <!-- Keep resize, shadow and custom caption area -->
     <WindowChrome.WindowChrome>
@@ -27,11 +24,6 @@
                             GlassFrameThickness="0"
                             ResizeBorderThickness="6"/>
     </WindowChrome.WindowChrome>
-
-    <Window.Resources>
-        <converters:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
-        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -95,223 +87,9 @@
             </Grid>
         </Border>
 
-        <!-- Main Content -->
-        <Grid Grid.Row="1" Background="{StaticResource LightGrayBrush}">
-            <Grid Margin="12,12">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Title Section with Controls -->
-                <Grid Grid.Row="0" Margin="0,0,0,16">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Title -->
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Job Applications" Style="{StaticResource HeaderTextStyle}"/>
-                        <TextBlock Style="{StaticResource SubHeaderTextStyle}">
-                            <Run Text="Showing"/>
-                            <Run Text="{Binding TotalCount, Mode=OneWay}"/>
-                            <Run Text="most recent applications"/>
-                        </TextBlock>
-                    </StackPanel>
-
-                    <!-- Controls on the Right -->
-                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                        <!-- View Mode Buttons -->
-                        <StackPanel Orientation="Horizontal" Margin="0,0,4,0">
-                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0" ToolTip="Settings"
-                                    Command="{Binding OpenSettingsCommand}">
-                                <Path Data="M3,3 h7 v7 h-7 z M13,3 h7 v7 h-7 z M3,13 h7 v7 h-7 z M13,13 h7 v7 h-7 z"
-                                      Fill="{StaticResource PrimaryBlueBrush}"
-                                      Stretch="Uniform" Width="16" Height="16"/>
-                            </Button>
-                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" Margin="0,0,4,0" ToolTip="List View">
-                                <Path Data="M0,0 h20 v4 h-20 z M0,8 h20 v4 h-20 z M0,16 h20 v4 h-20 z"
-                                      Fill="{StaticResource MediumTextBrush}"
-                                      Stretch="Uniform" Width="16" Height="16"/>
-                            </Button>
-                            <Button Style="{StaticResource IconButtonStyle}" Width="36" Height="36" ToolTip="Recruiter View">
-                                <Path Data="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                                      Fill="{StaticResource MediumTextBrush}"
-                                      Stretch="Uniform" Width="16" Height="16"/>
-                            </Button>
-                        </StackPanel>
-
-                        <!-- Filter TextBox -->
-                        <TextBox Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource ModernTextBoxStyle}"
-                                 helpers:WatermarkHelper.Watermark="Filter by company..."
-                                 Width="300"
-                                 Height="36"
-                                 VerticalContentAlignment="Center"
-                                 Margin="0,0,8,0"
-                                 ToolTip="Filter by company"/>
-
-                        <!-- Action Buttons -->
-                        <Button Content="+ New Application"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Command="{Binding NewApplicationCommand}"
-                                Height="36"
-                                Margin="0,0,8,0"/>
-                        <Button Content="Delete"
-                                Style="{StaticResource DangerButtonStyle}"
-                                Command="{Binding DeleteApplicationCommand}"
-                                Height="36"
-                                Margin="0,0,8,0"/>
-                        <Button Content="Reports"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Command="{Binding ReportsCommand}"
-                                Height="36"/>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Data Grid -->
-                <Border Grid.Row="1"
-                        Background="White"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="4">
-                    <DataGrid ItemsSource="{Binding FilteredJobApplications}"
-                              SelectedItem="{Binding SelectedJobApplication}"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              CanUserResizeRows="False"
-                              IsReadOnly="True"
-                              HeadersVisibility="Column"
-                              GridLinesVisibility="None"
-                              SelectionMode="Single"
-                              BorderThickness="1"
-                              RowHeight="35"
-                              AlternatingRowBackground="#FAFAFA"
-                              MouseDoubleClick="DataGrid_MouseDoubleClick">
-
-                        <DataGrid.ColumnHeaderStyle>
-                            <Style TargetType="DataGridColumnHeader">
-                                <Setter Property="Background" Value="{StaticResource LightBlueBrush}"/>
-                                <Setter Property="Foreground" Value="{StaticResource PrimaryBlueBrush}"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
-                                <Setter Property="FontSize" Value="12"/>
-                                <Setter Property="Padding" Value="12,12"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                            </Style>
-                        </DataGrid.ColumnHeaderStyle>
-
-                        <DataGrid.CellStyle>
-                            <Style TargetType="DataGridCell">
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Padding" Value="10,0"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="DataGridCell">
-                                            <Border Padding="{TemplateBinding Padding}"
-                                                    Background="{TemplateBinding Background}">
-                                                <ContentPresenter VerticalAlignment="Center"
-                                                                  TextElement.Foreground="{TemplateBinding Foreground}"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsSelected" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource PrimaryBlueBrush}"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </DataGrid.CellStyle>
-
-                        <DataGrid.Columns>
-                            <!-- TOP Column -->
-                            <DataGridTemplateColumn Header="TOP" Width="60">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Viewbox Width="20" Height="20"
-                                                 Visibility="{Binding TopJob, Converter={StaticResource BoolToVisibilityConverter}}">
-                                            <Path Data="M12,17.27L18.18,21l-1.64-7.03L22,9.24l-7.19-0.61L12,2 9.19,8.63 2,9.24l5.46,4.73L5.82,21z"
-                                                  Fill="#FFC107"/>
-                                        </Viewbox>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-
-                            <!-- Company Column -->
-                            <DataGridTextColumn Header="COMPANY"
-                                                Binding="{Binding Company}"
-                                                Width="2*"
-                                                MinWidth="150">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="FontWeight" Value="Medium"/>
-                                        <Setter Property="FontSize" Value="14"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-
-                            <!-- Role Column -->
-                            <DataGridTextColumn Header="POSITION"
-                                                Binding="{Binding Position}"
-                                                Width="2*"
-                                                MinWidth="200">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="FontSize" Value="14"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-
-                            <!-- Salary Column -->
-                            <DataGridTextColumn Header="SALARY"
-                                                Binding="{Binding Salary}"
-                                                Width="160"
-                                                MinWidth="120">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="FontSize" Value="14"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-
-                            <!-- Applied Date Column -->
-                            <DataGridTextColumn Header="APPLIED"
-                                                Binding="{Binding CreatedAt, StringFormat='MMM dd, yyyy'}"
-                                                Width="120"
-                                                MinWidth="120">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="FontSize" Value="14"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-
-                            <!-- Status Column -->
-                            <DataGridTemplateColumn Header="STATUS" Width="120">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate>
-                                        <Border Background="{Binding CurrentStatus, Converter={StaticResource StatusToBrushConverter}}"
-                                                CornerRadius="4"
-                                                Padding="12,4"
-                                                HorizontalAlignment="Center" Width="90">
-                                            <TextBlock Text="{Binding CurrentStatusText}"
-                                                       Foreground="White"
-                                                       FontWeight="Bold"
-                                                       FontSize="11"
-                                                       HorizontalAlignment="Center"/>
-                                        </Border>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Border>
-            </Grid>
-        </Grid>
+        <!-- Main Content: Single ContentControl for view swapping -->
+        <ContentControl Grid.Row="1"
+                        Content="{Binding CurrentView, NotifyOnTargetUpdated=True}"
+                        Style="{StaticResource TransitionContentStyle}"/>
     </Grid>
 </Window>

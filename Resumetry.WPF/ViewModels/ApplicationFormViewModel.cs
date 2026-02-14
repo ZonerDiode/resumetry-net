@@ -1,9 +1,12 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Enums;
+using Resumetry.WPF.Messages;
+using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
@@ -33,7 +36,7 @@ namespace Resumetry.ViewModels
         private string _description = string.Empty;
     }
 
-    public partial class ApplicationFormViewModel(IJobApplicationService jobApplicationService) : ViewModelBase
+    public partial class ApplicationFormViewModel(IJobApplicationService jobApplicationService, INavigationService navigationService, IDialogService dialogService) : ViewModelBase
     {
         public bool IsEditMode => ExistingId.HasValue;
         public string WindowTitle => IsEditMode ? "Edit Application" : "New Application";
@@ -178,8 +181,16 @@ namespace Resumetry.ViewModels
                    !string.IsNullOrWhiteSpace(Role);
         }
 
-        public async Task<bool> SaveAsync()
+        [RelayCommand]
+        private async Task SaveAsync()
         {
+            // Validate
+            if (!Validate())
+            {
+                dialogService.ShowError("Please fill in Company and Role fields.", "Validation Error");
+                return;
+            }
+
             try
             {
                 // Build recruiter DTO if provided
@@ -240,32 +251,30 @@ namespace Resumetry.ViewModels
                     await jobApplicationService.CreateAsync(createDto);
                 }
 
-                return true;
+                // Send message to notify that a job application was saved
+                WeakReferenceMessenger.Default.Send(new JobApplicationSavedMessage());
+
+                // Navigate back to home
+                navigationService.NavigateToHome();
             }
             catch (KeyNotFoundException)
             {
-                System.Windows.MessageBox.Show("Job application not found.",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
-                return false;
+                dialogService.ShowError("Job application not found.", "Error");
             }
             catch (ArgumentException ex)
             {
-                System.Windows.MessageBox.Show($"Validation error: {ex.Message}",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
-                return false;
+                dialogService.ShowError($"Validation error: {ex.Message}", "Error");
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Error saving job application: {ex.Message}",
-                    "Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
-                return false;
+                dialogService.ShowError($"Error saving job application: {ex.Message}", "Error");
             }
+        }
+
+        [RelayCommand]
+        private void Cancel()
+        {
+            navigationService.NavigateToHome();
         }
     }
 }

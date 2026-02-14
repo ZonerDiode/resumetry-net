@@ -1,12 +1,16 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Resumetry.Application.Interfaces;
+using Resumetry.WPF.Messages;
 using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
-    public partial class MainViewModel(IScopedRunner scopedRunner, IDialogService dialogService) : ViewModelBase
+    public partial class JobApplicationListViewModel(IScopedRunner scopedRunner, IDialogService dialogService, INavigationService navigationService) : ViewModelBase,
+        IRecipient<JobApplicationSavedMessage>,
+        IRecipient<DataImportedMessage>
     {
         private readonly ObservableCollection<JobApplicationViewModel> _jobApplications = [];
 
@@ -73,14 +77,7 @@ namespace Resumetry.ViewModels
         [RelayCommand]
         private void NewApplication()
         {
-            if (dialogService.ShowApplicationForm())
-            {
-                // Refresh the list after adding
-                ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
-                {
-                    dialogService.ShowError($"Error refreshing data: {ex.Message}", "Error");
-                });
-            }
+            navigationService.NavigateTo<ApplicationFormViewModel>();
         }
 
         [RelayCommand(CanExecute = nameof(CanModifyApplication))]
@@ -100,11 +97,7 @@ namespace Resumetry.ViewModels
                     return;
                 }
 
-                if (dialogService.ShowApplicationForm(vm => vm.LoadExistingJobApplication(detailDto)))
-                {
-                    // Refresh the list after editing
-                    await LoadJobApplicationsAsync();
-                }
+                navigationService.NavigateTo<ApplicationFormViewModel>(vm => vm.LoadExistingJobApplication(detailDto));
             }
             catch (Exception ex)
             {
@@ -152,9 +145,25 @@ namespace Resumetry.ViewModels
         [RelayCommand]
         private void OpenSettings()
         {
-            dialogService.ShowSettings();
+            navigationService.NavigateTo<SettingsViewModel>();
+        }
 
-            // Refresh the list after closing settings (in case data was imported)
+        /// <summary>
+        /// Handles the JobApplicationSavedMessage by refreshing the list.
+        /// </summary>
+        public void Receive(JobApplicationSavedMessage message)
+        {
+            ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
+            {
+                dialogService.ShowError($"Error refreshing data: {ex.Message}", "Error");
+            });
+        }
+
+        /// <summary>
+        /// Handles the DataImportedMessage by refreshing the list.
+        /// </summary>
+        public void Receive(DataImportedMessage message)
+        {
             ExecuteAsyncSafe(LoadJobApplicationsAsync, ex =>
             {
                 dialogService.ShowError($"Error refreshing data: {ex.Message}", "Error");

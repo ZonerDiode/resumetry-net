@@ -167,4 +167,33 @@
         <Setter Property="Foreground" Value="#546E7A"/>
         <Setter Property="Margin" Value="0,0,0,4"/>
     </Style>
+
+    <!-- Transition Animation Style for ContentControl -->
+    <Style x:Key="TransitionContentStyle" TargetType="ContentControl">
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <!-- Fade in animation -->
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                         From="0" To="1"
+                                         Duration="0:0:0.3">
+                            <DoubleAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut"/>
+                            </DoubleAnimation.EasingFunction>
+                        </DoubleAnimation>
+
+                        <!-- Slide in from left animation -->
+                        <ThicknessAnimation Storyboard.TargetProperty="Margin"
+                                            From="60,0,0,0" To="0"
+                                            Duration="0:0:0.3">
+                            <ThicknessAnimation.EasingFunction>
+                                <CubicEase EasingMode="EaseOut"/>
+                            </ThicknessAnimation.EasingFunction>
+                        </ThicknessAnimation>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>

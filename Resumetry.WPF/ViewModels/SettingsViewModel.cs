@@ -1,12 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Win32;
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Interfaces;
+using Resumetry.WPF.Messages;
+using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
-    public partial class SettingsViewModel(IImportService importService, IUnitOfWork unitOfWork) : ViewModelBase
+    public partial class SettingsViewModel(IImportService importService, IUnitOfWork unitOfWork, INavigationService navigationService, IDialogService dialogService) : ViewModelBase
     {
 
         [ObservableProperty]
@@ -45,14 +48,14 @@ namespace Resumetry.ViewModels
                 await unitOfWork.SaveChangesAsync();
 
                 StatusMessage = $"Successfully imported {importedCount} application(s)";
+
+                // Send message to notify that data was imported
+                WeakReferenceMessenger.Default.Send(new DataImportedMessage());
             }
             catch (Exception ex)
             {
                 StatusMessage = $"Error importing: {ex.Message}";
-                System.Windows.MessageBox.Show($"Error importing JSON file: {ex.Message}",
-                    "Import Error",
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Error);
+                dialogService.ShowError($"Error importing JSON file: {ex.Message}", "Import Error");
             }
         }
 
@@ -60,10 +63,13 @@ namespace Resumetry.ViewModels
         private void ExportToJson()
         {
             // Placeholder for future implementation
-            System.Windows.MessageBox.Show("Export functionality coming soon!",
-                "Export",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Information);
+            dialogService.ShowInfo("Export functionality coming soon!", "Export");
+        }
+
+        [RelayCommand]
+        private void Close()
+        {
+            navigationService.NavigateToHome();
         }
     }
 }

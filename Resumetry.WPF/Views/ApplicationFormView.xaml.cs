@@ -1,19 +1,46 @@
 using System.Windows;
+using System.Windows.Controls;
 using Resumetry.ViewModels;
 using Microsoft.Web.WebView2.Core;
 
 namespace Resumetry.Views
 {
-    public partial class ApplicationFormWindow : Window
+    /// <summary>
+    /// Interaction logic for ApplicationFormView.xaml
+    /// </summary>
+    public partial class ApplicationFormView : UserControl
     {
-        private ApplicationFormViewModel ViewModel => (ApplicationFormViewModel)DataContext;
+        private ApplicationFormViewModel? ViewModel => DataContext as ApplicationFormViewModel;
         private bool _isWebViewInitialized = false;
         private bool _isSyncingFromWebView = false;
 
-        public ApplicationFormWindow(ApplicationFormViewModel viewModel)
+        public ApplicationFormView()
         {
             InitializeComponent();
-            DataContext = viewModel;
+        }
+
+        private async void ApplicationFormView_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            // Initialize WebView2
+            await DescriptionWebView.EnsureCoreWebView2Async(null);
+
+            // Add initial status item only for new applications
+            if (ViewModel != null && ViewModel.StatusItems.Count == 0)
+            {
+                ViewModel.AddStatusCommand.Execute(null);
+            }
+        }
+
+        private void ApplicationFormView_OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            // Cleanup WebView2 to prevent memory leaks
+            if (DescriptionWebView.CoreWebView2 != null)
+            {
+                DescriptionWebView.CoreWebView2.WebMessageReceived -= CoreWebView2_WebMessageReceived;
+                DescriptionWebView.Dispose();
+            }
+
+            _isWebViewInitialized = false;
         }
 
         private async void DescriptionWebView_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
@@ -35,7 +62,10 @@ namespace Resumetry.Views
             _isSyncingFromWebView = true;
             try
             {
-                ViewModel.Description = e.TryGetWebMessageAsString();
+                if (ViewModel != null)
+                {
+                    ViewModel.Description = e.TryGetWebMessageAsString();
+                }
             }
             finally
             {
@@ -49,7 +79,7 @@ namespace Resumetry.Views
             if (_isSyncingFromWebView)
                 return;
 
-            if (_isWebViewInitialized && DescriptionWebView.CoreWebView2 != null)
+            if (_isWebViewInitialized && DescriptionWebView.CoreWebView2 != null && ViewModel != null)
             {
                 var htmlContent = WrapHtmlContent(ViewModel.Description);
                 DescriptionWebView.NavigateToString(htmlContent);
@@ -102,43 +132,6 @@ namespace Resumetry.Views
     }});
 </script>
 </html>";
-        }
-
-        private async void CreateButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!ViewModel.Validate())
-            {
-                MessageBox.Show("Please fill in all required fields (Company and Role).",
-                    "Validation Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
-
-            var success = await ViewModel.SaveAsync();
-            if (success)
-            {
-                DialogResult = true;
-                Close();
-            }
-        }
-
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
-        }
-
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Initialize WebView2
-            await DescriptionWebView.EnsureCoreWebView2Async(null);
-
-            // Add initial status item only for new applications
-            if (ViewModel.StatusItems.Count == 0)
-            {
-                ViewModel.AddStatusCommand.Execute(null);
-            }
         }
     }
 }
