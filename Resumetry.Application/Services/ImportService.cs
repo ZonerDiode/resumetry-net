@@ -22,11 +22,6 @@ namespace Resumetry.Application.Services
             return [.. dtos.Select(MapDtoToEntity)];
         }
 
-        public Task<IEnumerable<JobApplication>> ImportFromCsvAsync(string filePath, CancellationToken cancellationToken = default)
-        {
-            throw new NotImplementedException("CSV import is not yet implemented");
-        }
-
         private JobApplication MapDtoToEntity(JobApplicationDto dto)
         {
             var jobApplication = new JobApplication

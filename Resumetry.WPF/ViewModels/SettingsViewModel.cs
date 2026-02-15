@@ -9,13 +9,11 @@ using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
-    public partial class SettingsViewModel(IImportService importService, IUnitOfWork unitOfWork, INavigationService navigationService, IDialogService dialogService) : ViewModelBase
+    public partial class SettingsViewModel(IImportService importService, IExportService exportService, IUnitOfWork unitOfWork, INavigationService navigationService, IDialogService dialogService) : ViewModelBase
     {
 
         [ObservableProperty]
         private string _statusMessage = string.Empty;
-
-        private bool CanExport() => false;
 
         [RelayCommand]
         private async Task ImportFromJsonAsync()
@@ -59,11 +57,38 @@ namespace Resumetry.ViewModels
             }
         }
 
-        [RelayCommand(CanExecute = nameof(CanExport))]
-        private void ExportToJson()
+        [RelayCommand]
+        private async Task ExportToJsonAsync()
         {
-            // Placeholder for future implementation
-            dialogService.ShowInfo("Export functionality coming soon!", "Export");
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*",
+                Title = "Export to JSON",
+                FileName = $"resumetry_export_{DateTime.Now:yyyyMMdd_HHmmss}.json"
+            };
+
+            if (saveFileDialog.ShowDialog() != true)
+            {
+                return;
+            }
+
+            try
+            {
+                StatusMessage = "Exporting...";
+
+                var jobApplications = await unitOfWork.JobApplications.GetAllAsync();
+                var jobApplicationsList = jobApplications.ToList();
+
+                await exportService.ExportToJsonAsync(jobApplicationsList, saveFileDialog.FileName);
+
+                StatusMessage = $"Successfully exported {jobApplicationsList.Count} application(s) to {saveFileDialog.FileName}";
+                dialogService.ShowInfo($"Successfully exported {jobApplicationsList.Count} application(s)", "Export Success");
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error exporting: {ex.Message}";
+                dialogService.ShowError($"Error exporting to JSON file: {ex.Message}", "Export Error");
+            }
         }
 
         [RelayCommand]

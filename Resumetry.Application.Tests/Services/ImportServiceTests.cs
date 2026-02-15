@@ -520,19 +520,4 @@ public class ImportServiceTests
 
     #endregion
 
-    #region ImportFromCsvAsync Tests
-
-    [Fact]
-    public async Task ImportFromCsvAsync_ThrowsNotImplementedException()
-    {
-        // Arrange
-        var filePath = "test.csv";
-
-        // Act & Assert
-        await FluentActions.Invoking(() => _sut.ImportFromCsvAsync(filePath))
-            .Should().ThrowAsync<NotImplementedException>()
-            .WithMessage("CSV import is not yet implemented");
-    }
-
-    #endregion
 }

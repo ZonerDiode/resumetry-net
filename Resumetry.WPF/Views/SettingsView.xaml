@@ -26,7 +26,7 @@
                 <!-- Close Button -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Close"
-                            Style="{StaticResource SecondaryButtonStyle}"
+                            Style="{StaticResource PrimaryButtonStyle}"
                             Command="{Binding CloseCommand}"
                             Width="120"
                             Height="40"/>
@@ -60,7 +60,7 @@
                         <!-- Export Button -->
                         <Button Grid.Row="2"
                                 Content="Export to JSON"
-                                Style="{StaticResource SecondaryButtonStyle}"
+                                Style="{StaticResource PrimaryButtonStyle}"
                                 Command="{Binding ExportToJsonCommand}"
                                 HorizontalAlignment="Left"
                                 Width="200"
