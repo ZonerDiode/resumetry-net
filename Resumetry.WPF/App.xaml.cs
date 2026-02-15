@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Resumetry.Application.Enums;
 using Resumetry.Application.Interfaces;
 using Resumetry.Application.Services;
 using Resumetry.Domain.Interfaces;
@@ -49,7 +50,8 @@ namespace Resumetry
 
             // Register services
             services.AddSingleton<IFileService, FileService>();
-            services.AddScoped<IImportService, LegacyImportService>();
+            services.AddKeyedScoped<IImportService, ImportService>(ImportType.Standard);
+            services.AddKeyedScoped<IImportService, LegacyImportService>(ImportType.Legacy);
             services.AddScoped<IExportService, ExportService>();
             services.AddScoped<IJobApplicationService, JobApplicationService>();
 

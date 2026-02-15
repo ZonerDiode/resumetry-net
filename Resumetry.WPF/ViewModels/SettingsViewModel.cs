@@ -1,22 +1,39 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
+using Resumetry.Application.Enums;
 using Resumetry.Application.Interfaces;
+using Resumetry.Domain.Entities;
 using Resumetry.Domain.Interfaces;
 using Resumetry.WPF.Messages;
 using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
-    public partial class SettingsViewModel(IImportService importService, IExportService exportService, IUnitOfWork unitOfWork, INavigationService navigationService, IDialogService dialogService) : ViewModelBase
+    public partial class SettingsViewModel(
+        [FromKeyedServices(ImportType.Standard)] IImportService importService,
+        [FromKeyedServices(ImportType.Legacy)] IImportService legacyImportService,
+        IExportService exportService,
+        IUnitOfWork unitOfWork,
+        INavigationService navigationService,
+        IDialogService dialogService) : ViewModelBase
     {
 
         [ObservableProperty]
         private string _statusMessage = string.Empty;
 
         [RelayCommand]
-        private async Task ImportFromLegacyJsonAsync()
+        private async Task ImportFromJsonAsync() =>
+            await ImportCoreAsync(importService.ImportFromJsonAsync);
+
+        [RelayCommand]
+        private async Task ImportFromLegacyJsonAsync() =>
+            await ImportCoreAsync(legacyImportService.ImportFromJsonAsync);
+
+        private async Task ImportCoreAsync(
+            Func<string, CancellationToken, Task<IEnumerable<JobApplication>>> importFunc)
         {
             var openFileDialog = new OpenFileDialog
             {
@@ -33,7 +50,7 @@ namespace Resumetry.ViewModels
             {
                 StatusMessage = "Importing...";
 
-                var jobApplications = await importService.ImportFromJsonAsync(openFileDialog.FileName);
+                var jobApplications = await importFunc(openFileDialog.FileName, CancellationToken.None);
                 var jobApplicationsList = jobApplications.ToList();
 
                 int importedCount = 0;
