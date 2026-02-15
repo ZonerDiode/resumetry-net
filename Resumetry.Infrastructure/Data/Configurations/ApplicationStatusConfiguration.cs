@@ -5,9 +5,9 @@ using Resumetry.Domain.Enums;
 
 namespace Resumetry.Infrastructure.Data.Configurations
 {
-    public class StatusItemConfiguration : IEntityTypeConfiguration<StatusItem>
+    public class ApplicationStatusConfiguration : IEntityTypeConfiguration<ApplicationStatus>
     {
-        public void Configure(EntityTypeBuilder<StatusItem> builder)
+        public void Configure(EntityTypeBuilder<ApplicationStatus> builder)
         {
             builder.HasKey(si => si.Id);
 

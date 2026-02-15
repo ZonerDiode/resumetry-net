@@ -25,7 +25,7 @@ namespace Resumetry.Views
             await DescriptionWebView.EnsureCoreWebView2Async(null);
 
             // Add initial status item only for new applications
-            if (ViewModel != null && ViewModel.StatusItems.Count == 0)
+            if (ViewModel != null && ViewModel.ApplicationStatuses.Count == 0)
             {
                 ViewModel.AddStatusCommand.Execute(null);
             }

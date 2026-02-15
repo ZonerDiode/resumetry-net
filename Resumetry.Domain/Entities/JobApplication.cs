@@ -14,6 +14,6 @@ namespace Resumetry.Domain.Entities
         public string? LoginNotes { get; set; }
         public Recruiter? Recruiter { get; set; }
         public ICollection<ApplicationEvent> ApplicationEvents { get; set; } = [];
-        public ICollection<StatusItem> StatusItems { get; set; } = [];
+        public ICollection<ApplicationStatus> ApplicationStatuses { get; set; } = [];
     }
 }

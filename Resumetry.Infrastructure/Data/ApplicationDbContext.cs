@@ -9,7 +9,7 @@ namespace Resumetry.Infrastructure.Data
         public DbSet<JobApplication> JobApplications => Set<JobApplication>();
         public DbSet<Recruiter> Recruiters => Set<Recruiter>();
         public DbSet<ApplicationEvent> ApplicationEvents => Set<ApplicationEvent>();
-        public DbSet<StatusItem> StatusItems => Set<StatusItem>();
+        public DbSet<ApplicationStatus> ApplicationStatuses => Set<ApplicationStatus>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

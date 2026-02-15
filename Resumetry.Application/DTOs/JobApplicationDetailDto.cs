@@ -15,5 +15,5 @@ public record JobApplicationDetailDto(
     string? LoginNotes,
     DateTime CreatedAt,
     RecruiterDto? Recruiter,
-    List<StatusItemDto> StatusItems,
+    List<ApplicationStatusDto> ApplicationStatuses,
     List<ApplicationEventDto> ApplicationEvents);

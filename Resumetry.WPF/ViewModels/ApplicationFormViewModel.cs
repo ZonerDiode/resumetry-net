@@ -10,7 +10,7 @@ using Resumetry.WPF.Services;
 
 namespace Resumetry.ViewModels
 {
-    public partial class StatusItemViewModel : ViewModelBase
+    public partial class ApplicationStatusViewModel : ViewModelBase
     {
         [ObservableProperty]
         private Guid? _id;
@@ -42,10 +42,10 @@ namespace Resumetry.ViewModels
         public string WindowTitle => IsEditMode ? "Edit Application" : "New Application";
         public string SaveButtonText => IsEditMode ? "Save" : "Create";
 
-        public ObservableCollection<StatusItemViewModel> StatusItems { get; } = [];
+        public ObservableCollection<ApplicationStatusViewModel> ApplicationStatuses { get; } = [];
         public ObservableCollection<ApplicationEventViewModel> ApplicationEvents { get; } = [];
 
-        public int StatusCount => StatusItems.Count;
+        public int StatusCount => ApplicationStatuses.Count;
         public int NotesCount => ApplicationEvents.Count;
 
         [ObservableProperty]
@@ -87,16 +87,16 @@ namespace Resumetry.ViewModels
         [RelayCommand]
         private void AddStatus()
         {
-            StatusItems.Add(new StatusItemViewModel { Occurred = DateTime.Now });
+            ApplicationStatuses.Add(new ApplicationStatusViewModel { Occurred = DateTime.Now });
             OnPropertyChanged(nameof(StatusCount));
         }
 
         [RelayCommand]
-        private void RemoveStatus(StatusItemViewModel? item)
+        private void RemoveStatus(ApplicationStatusViewModel? item)
         {
             if (item != null)
             {
-                StatusItems.Remove(item);
+                ApplicationStatuses.Remove(item);
                 OnPropertyChanged(nameof(StatusCount));
             }
         }
@@ -139,10 +139,10 @@ namespace Resumetry.ViewModels
             }
 
             // Load status items with their IDs
-            StatusItems.Clear();
-            foreach (var statusItemDto in detailDto.StatusItems.OrderBy(s => s.Occurred))
+            ApplicationStatuses.Clear();
+            foreach (var statusItemDto in detailDto.ApplicationStatuses.OrderBy(s => s.Occurred))
             {
-                StatusItems.Add(new StatusItemViewModel
+                ApplicationStatuses.Add(new ApplicationStatusViewModel
                 {
                     Id = statusItemDto.Id,
                     Occurred = statusItemDto.Occurred,
@@ -151,7 +151,7 @@ namespace Resumetry.ViewModels
             }
 
             // Add one if empty
-            if (StatusItems.Count == 0)
+            if (ApplicationStatuses.Count == 0)
             {
                 AddStatus();
             }
@@ -203,8 +203,8 @@ namespace Resumetry.ViewModels
                 }
 
                 // Build status items DTOs
-                var statusItemDtos = StatusItems
-                    .Select(s => new StatusItemDto(s.Occurred, s.Status, s.Id))
+                var statusItemDtos = ApplicationStatuses
+                    .Select(s => new ApplicationStatusDto(s.Occurred, s.Status, s.Id))
                     .ToList();
 
                 // Build application events DTOs (exclude empty descriptions)
@@ -227,7 +227,7 @@ namespace Resumetry.ViewModels
                         ReviewPage: string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl,
                         LoginNotes: string.IsNullOrWhiteSpace(LoginHints) ? null : LoginHints,
                         Recruiter: recruiterDto,
-                        StatusItems: statusItemDtos,
+                        ApplicationStatuses: statusItemDtos,
                         ApplicationEvents: eventDtos);
 
                     await jobApplicationService.UpdateAsync(updateDto);
@@ -245,7 +245,7 @@ namespace Resumetry.ViewModels
                         ReviewPage: string.IsNullOrWhiteSpace(ReviewPageUrl) ? null : ReviewPageUrl,
                         LoginNotes: string.IsNullOrWhiteSpace(LoginHints) ? null : LoginHints,
                         Recruiter: recruiterDto,
-                        StatusItems: statusItemDtos,
+                        ApplicationStatuses: statusItemDtos,
                         ApplicationEvents: eventDtos);
 
                     await jobApplicationService.CreateAsync(createDto);

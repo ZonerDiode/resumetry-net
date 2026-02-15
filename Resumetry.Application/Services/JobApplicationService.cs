@@ -45,11 +45,11 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         }
 
         // Map status items if present
-        if (dto.StatusItems is not null)
+        if (dto.ApplicationStatuses is not null)
         {
-            foreach (var statusDto in dto.StatusItems)
+            foreach (var statusDto in dto.ApplicationStatuses)
             {
-                entity.StatusItems.Add(new StatusItem
+                entity.ApplicationStatuses.Add(new ApplicationStatus
                 {
                     Occurred = statusDto.Occurred,
                     Status = statusDto.Status
@@ -101,7 +101,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         SyncRecruiter(entity, dto.Recruiter);
 
         // Sync status items
-        SyncStatusItems(entity, dto.StatusItems);
+        SyncApplicationStatuses(entity, dto.ApplicationStatuses);
 
         // Sync application events
         SyncApplicationEvents(entity, dto.ApplicationEvents);
@@ -118,19 +118,19 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
 
         return entities.Select(entity =>
         {
-            // Compute current status from latest StatusItem
-            var latestStatusItem = entity.StatusItems
+            // Compute current status from latest ApplicationStatus
+            var latestApplicationStatus = entity.ApplicationStatuses
                 .OrderByDescending(s => s.Occurred)
                 .FirstOrDefault();
-            var currentStatus = latestStatusItem?.Status;
+            var currentStatus = latestApplicationStatus?.Status;
             var currentStatusText = currentStatus?.ToString() ?? "UNKNOWN";
 
-            // Compute applied date from first APPLIED StatusItem, fallback to CreatedAt
-            var appliedStatusItem = entity.StatusItems
+            // Compute applied date from first APPLIED ApplicationStatus, fallback to CreatedAt
+            var appliedApplicationStatus = entity.ApplicationStatuses
                 .Where(s => s.Status == Domain.Enums.StatusEnum.Applied)
                 .OrderBy(s => s.Occurred)
                 .FirstOrDefault();
-            var appliedDate = appliedStatusItem?.Occurred ?? entity.CreatedAt;
+            var appliedDate = appliedApplicationStatus?.Occurred ?? entity.CreatedAt;
 
             return new JobApplicationSummaryDto(
                 Id: entity.Id,
@@ -172,7 +172,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
                 Email: entity.Recruiter.Email,
                 Phone: entity.Recruiter.Phone
             ),
-            StatusItems: entity.StatusItems.Select(s => new StatusItemDto(
+            ApplicationStatuses: entity.ApplicationStatuses.Select(s => new ApplicationStatusDto(
                 Occurred: s.Occurred,
                 Status: s.Status,
                 Id: s.Id
@@ -237,17 +237,17 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         }
     }
 
-    private static void SyncStatusItems(JobApplication entity, List<StatusItemDto>? statusItemsDto)
+    private static void SyncApplicationStatuses(JobApplication entity, List<ApplicationStatusDto>? statusItemsDto)
     {
         statusItemsDto ??= [];
 
         // Remove items not in the DTO list
-        var itemsToRemove = entity.StatusItems
+        var itemsToRemove = entity.ApplicationStatuses
             .Where(existing => !statusItemsDto.Any(dto => dto.Id == existing.Id))
             .ToList();
         foreach (var item in itemsToRemove)
         {
-            entity.StatusItems.Remove(item);
+            entity.ApplicationStatuses.Remove(item);
         }
 
         // Update existing or add new items
@@ -256,7 +256,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
             if (dto.Id.HasValue)
             {
                 // Update existing
-                var existing = entity.StatusItems.FirstOrDefault(x => x.Id == dto.Id);
+                var existing = entity.ApplicationStatuses.FirstOrDefault(x => x.Id == dto.Id);
                 if (existing is not null)
                 {
                     existing.Occurred = dto.Occurred;
@@ -266,7 +266,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
             else
             {
                 // Add new
-                entity.StatusItems.Add(new StatusItem
+                entity.ApplicationStatuses.Add(new ApplicationStatus
                 {
                     Occurred = dto.Occurred,
                     Status = dto.Status

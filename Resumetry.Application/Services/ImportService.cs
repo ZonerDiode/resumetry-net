@@ -56,7 +56,7 @@ namespace Resumetry.Application.Services
                 {
                     if (Enum.TryParse<StatusEnum>(statusDto.Status, true, out var statusEnum))
                     {
-                        jobApplication.StatusItems.Add(new StatusItem
+                        jobApplication.ApplicationStatuses.Add(new ApplicationStatus
                         {
                             Occurred = statusDto.OccurDate,
                             Status = statusEnum

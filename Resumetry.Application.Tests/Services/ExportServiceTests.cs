@@ -145,7 +145,7 @@ public class ExportServiceTests
     }
 
     [Fact]
-    public async Task ExportToJsonAsync_WithStatusItems_IncludesStatusCollection()
+    public async Task ExportToJsonAsync_WithApplicationStatuses_IncludesStatusCollection()
     {
         // Arrange
         var jobApplication = new JobApplication
@@ -156,13 +156,13 @@ public class ExportServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        jobApplication.StatusItems.Add(new StatusItem
+        jobApplication.ApplicationStatuses.Add(new ApplicationStatus
         {
             Occurred = new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc),
             Status = StatusEnum.Applied
         });
 
-        jobApplication.StatusItems.Add(new StatusItem
+        jobApplication.ApplicationStatuses.Add(new ApplicationStatus
         {
             Occurred = new DateTime(2024, 1, 20, 10, 0, 0, DateTimeKind.Utc),
             Status = StatusEnum.Screen
@@ -187,7 +187,7 @@ public class ExportServiceTests
         var document = JsonDocument.Parse(capturedJson!);
         var app = document.RootElement[0];
 
-        var statusItems = app.GetProperty("StatusItems");
+        var statusItems = app.GetProperty("ApplicationStatuses");
         statusItems.GetArrayLength().Should().Be(2);
         statusItems[0].GetProperty("Status").GetString().Should().Be("Applied");
         statusItems[1].GetProperty("Status").GetString().Should().Be("Screen");

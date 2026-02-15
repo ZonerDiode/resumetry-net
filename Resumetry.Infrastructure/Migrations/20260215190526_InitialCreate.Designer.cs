@@ -11,8 +11,8 @@ using Resumetry.Infrastructure.Data;
 namespace Resumetry.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260209195308_MakeDescriptionAndSalaryOptional")]
-    partial class MakeDescriptionAndSalaryOptional
+    [Migration("20260215190526_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,6 +47,36 @@ namespace Resumetry.Infrastructure.Migrations
                     b.HasIndex("JobApplicationId");
 
                     b.ToTable("ApplicationEvents");
+                });
+
+            modelBuilder.Entity("Resumetry.Domain.Entities.ApplicationStatus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("JobApplicationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Occurred")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobApplicationId");
+
+                    b.ToTable("ApplicationStatuses");
                 });
 
             modelBuilder.Entity("Resumetry.Domain.Entities.JobApplication", b =>
@@ -136,40 +166,19 @@ namespace Resumetry.Infrastructure.Migrations
                     b.ToTable("Recruiters");
                 });
 
-            modelBuilder.Entity("Resumetry.Domain.Entities.StatusItem", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("JobApplicationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Occurred")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("JobApplicationId");
-
-                    b.ToTable("StatusItems");
-                });
-
             modelBuilder.Entity("Resumetry.Domain.Entities.ApplicationEvent", b =>
                 {
                     b.HasOne("Resumetry.Domain.Entities.JobApplication", null)
                         .WithMany("ApplicationEvents")
+                        .HasForeignKey("JobApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Resumetry.Domain.Entities.ApplicationStatus", b =>
+                {
+                    b.HasOne("Resumetry.Domain.Entities.JobApplication", null)
+                        .WithMany("ApplicationStatuses")
                         .HasForeignKey("JobApplicationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -185,20 +194,11 @@ namespace Resumetry.Infrastructure.Migrations
                     b.Navigation("Recruiter");
                 });
 
-            modelBuilder.Entity("Resumetry.Domain.Entities.StatusItem", b =>
-                {
-                    b.HasOne("Resumetry.Domain.Entities.JobApplication", null)
-                        .WithMany("StatusItems")
-                        .HasForeignKey("JobApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Resumetry.Domain.Entities.JobApplication", b =>
                 {
                     b.Navigation("ApplicationEvents");
 
-                    b.Navigation("StatusItems");
+                    b.Navigation("ApplicationStatuses");
                 });
 #pragma warning restore 612, 618
         }

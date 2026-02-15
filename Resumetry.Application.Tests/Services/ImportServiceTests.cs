@@ -218,7 +218,7 @@ public class ImportServiceTests
     }
 
     [Fact]
-    public async Task ImportFromJsonAsync_WithStatusItems_MapsCorrectly()
+    public async Task ImportFromJsonAsync_WithApplicationStatuses_MapsCorrectly()
     {
         // Arrange
         var filePath = "test.json";
@@ -257,14 +257,14 @@ public class ImportServiceTests
 
         // Assert
         var application = result.First();
-        application.StatusItems.Should().HaveCount(3);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Applied);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Screen);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Interview);
+        application.ApplicationStatuses.Should().HaveCount(3);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
     }
 
     [Fact]
-    public async Task ImportFromJsonAsync_WithInvalidStatus_SkipsInvalidStatusItem()
+    public async Task ImportFromJsonAsync_WithInvalidStatus_SkipsInvalidApplicationtatus()
     {
         // Arrange
         var filePath = "test.json";
@@ -303,10 +303,10 @@ public class ImportServiceTests
 
         // Assert
         var application = result.First();
-        application.StatusItems.Should().HaveCount(2);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Applied);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Interview);
-        application.StatusItems.Should().NotContain(s => s.Status.ToString() == "InvalidStatus");
+        application.ApplicationStatuses.Should().HaveCount(2);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
+        application.ApplicationStatuses.Should().NotContain(s => s.Status.ToString() == "InvalidStatus");
     }
 
     [Fact]
@@ -512,10 +512,10 @@ public class ImportServiceTests
 
         // Assert
         var application = result.First();
-        application.StatusItems.Should().HaveCount(3);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Applied);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Screen);
-        application.StatusItems.Should().Contain(s => s.Status == StatusEnum.Interview);
+        application.ApplicationStatuses.Should().HaveCount(3);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
+        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
     }
 
     #endregion

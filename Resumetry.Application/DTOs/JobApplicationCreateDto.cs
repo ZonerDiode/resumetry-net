@@ -13,5 +13,5 @@ public record JobApplicationCreateDto(
     string? ReviewPage = null,
     string? LoginNotes = null,
     RecruiterDto? Recruiter = null,
-    List<StatusItemDto>? StatusItems = null,
+    List<ApplicationStatusDto>? ApplicationStatuses = null,
     List<ApplicationEventDto>? ApplicationEvents = null);

@@ -51,8 +51,8 @@ namespace Resumetry.Infrastructure.Data.Configurations
                 .HasForeignKey("JobApplicationId")
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Relationship with StatusItems (cascade delete)
-            builder.HasMany(ja => ja.StatusItems)
+            // Relationship with ApplicationStatuses (cascade delete)
+            builder.HasMany(ja => ja.ApplicationStatuses)
                 .WithOne()
                 .HasForeignKey("JobApplicationId")
                 .OnDelete(DeleteBehavior.Cascade);

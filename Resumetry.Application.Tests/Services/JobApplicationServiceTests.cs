@@ -81,10 +81,10 @@ public class JobApplicationServiceTests
     }
 
     [Fact]
-    public async Task CreateAsync_WithStatusItems_AddsStatusItemsToEntity()
+    public async Task CreateAsync_WithApplicationStatuses_AddsApplicationStatusesToEntity()
     {
         // Arrange
-        var statusItems = new List<StatusItemDto>
+        var statusItems = new List<ApplicationStatusDto>
         {
             new(DateTime.UtcNow.AddDays(-2), StatusEnum.Applied),
             new(DateTime.UtcNow.AddDays(-1), StatusEnum.Screen)
@@ -93,7 +93,7 @@ public class JobApplicationServiceTests
         var dto = new JobApplicationCreateDto(
             Company: "TechCorp",
             Position: "Software Engineer",
-            StatusItems: statusItems);
+            ApplicationStatuses: statusItems);
 
         JobApplication? capturedEntity = null;
         _mockRepository.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
@@ -104,9 +104,9 @@ public class JobApplicationServiceTests
 
         // Assert
         capturedEntity.Should().NotBeNull();
-        capturedEntity!.StatusItems.Should().HaveCount(2);
-        capturedEntity.StatusItems.Should().Contain(s => s.Status == StatusEnum.Applied);
-        capturedEntity.StatusItems.Should().Contain(s => s.Status == StatusEnum.Screen);
+        capturedEntity!.ApplicationStatuses.Should().HaveCount(2);
+        capturedEntity.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        capturedEntity.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
     }
 
     [Fact]
@@ -357,7 +357,7 @@ public class JobApplicationServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WithNewStatusItem_AddsToCollection()
+    public async Task UpdateAsync_WithNewApplicationStatus_AddsToCollection()
     {
         // Arrange
         var existingId = Guid.NewGuid();
@@ -371,7 +371,7 @@ public class JobApplicationServiceTests
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
-        var statusItems = new List<StatusItemDto>
+        var applicationStatuses = new List<ApplicationStatusDto>
         {
             new(DateTime.UtcNow, StatusEnum.Applied, Id: null) // null Id means new
         };
@@ -380,18 +380,18 @@ public class JobApplicationServiceTests
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
-            StatusItems: statusItems);
+            ApplicationStatuses: applicationStatuses);
 
         // Act
         await _sut.UpdateAsync(dto);
 
         // Assert
-        existingEntity.StatusItems.Should().HaveCount(1);
-        existingEntity.StatusItems.First().Status.Should().Be(StatusEnum.Applied);
+        existingEntity.ApplicationStatuses.Should().HaveCount(1);
+        existingEntity.ApplicationStatuses.First().Status.Should().Be(StatusEnum.Applied);
     }
 
     [Fact]
-    public async Task UpdateAsync_WithExistingStatusItem_UpdatesInCollection()
+    public async Task UpdateAsync_WithExistingApplicationStatus_UpdatesInCollection()
     {
         // Arrange
         var existingId = Guid.NewGuid();
@@ -401,22 +401,22 @@ public class JobApplicationServiceTests
             Id = existingId,
             Company = "TechCorp",
             Position = "Engineer",
-            StatusItems = new List<StatusItem>
-            {
-                new StatusItem
+            ApplicationStatuses =
+            [
+                new ApplicationStatus
                 {
                     Id = statusItemId,
                     Occurred = DateTime.UtcNow.AddDays(-5),
                     Status = StatusEnum.Applied
                 }
-            }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
         var newOccurred = DateTime.UtcNow.AddDays(-3);
-        var statusItems = new List<StatusItemDto>
+        var applicationStatuses = new List<ApplicationStatusDto>
         {
             new(newOccurred, StatusEnum.Screen, Id: statusItemId) // existing Id
         };
@@ -425,21 +425,21 @@ public class JobApplicationServiceTests
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
-            StatusItems: statusItems);
+            ApplicationStatuses: applicationStatuses);
 
         // Act
         await _sut.UpdateAsync(dto);
 
         // Assert
-        existingEntity.StatusItems.Should().HaveCount(1);
-        var updatedItem = existingEntity.StatusItems.First();
+        existingEntity.ApplicationStatuses.Should().HaveCount(1);
+        var updatedItem = existingEntity.ApplicationStatuses.First();
         updatedItem.Id.Should().Be(statusItemId);
         updatedItem.Status.Should().Be(StatusEnum.Screen);
         updatedItem.Occurred.Should().BeCloseTo(newOccurred, TimeSpan.FromSeconds(1));
     }
 
     [Fact]
-    public async Task UpdateAsync_WithRemovedStatusItem_RemovesFromCollection()
+    public async Task UpdateAsync_WithRemovedApplicationStatus_RemovesFromCollection()
     {
         // Arrange
         var existingId = Guid.NewGuid();
@@ -450,18 +450,18 @@ public class JobApplicationServiceTests
             Id = existingId,
             Company = "TechCorp",
             Position = "Engineer",
-            StatusItems = new List<StatusItem>
-            {
-                new StatusItem { Id = statusItemId1, Occurred = DateTime.UtcNow, Status = StatusEnum.Applied },
-                new StatusItem { Id = statusItemId2, Occurred = DateTime.UtcNow, Status = StatusEnum.Screen }
-            }
+            ApplicationStatuses =
+            [
+                new ApplicationStatus { Id = statusItemId1, Occurred = DateTime.UtcNow, Status = StatusEnum.Applied },
+                new ApplicationStatus { Id = statusItemId2, Occurred = DateTime.UtcNow, Status = StatusEnum.Screen }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(existingEntity);
 
         // Only include one of the two existing items
-        var statusItems = new List<StatusItemDto>
+        var applicationStatuses = new List<ApplicationStatusDto>
         {
             new(DateTime.UtcNow, StatusEnum.Applied, Id: statusItemId1)
         };
@@ -470,14 +470,14 @@ public class JobApplicationServiceTests
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
-            StatusItems: statusItems);
+            ApplicationStatuses: applicationStatuses);
 
         // Act
         await _sut.UpdateAsync(dto);
 
         // Assert
-        existingEntity.StatusItems.Should().HaveCount(1);
-        existingEntity.StatusItems.First().Id.Should().Be(statusItemId1);
+        existingEntity.ApplicationStatuses.Should().HaveCount(1);
+        existingEntity.ApplicationStatuses.First().Id.Should().Be(statusItemId1);
     }
 
     [Fact]
@@ -525,15 +525,15 @@ public class JobApplicationServiceTests
             Id = existingId,
             Company = "TechCorp",
             Position = "Engineer",
-            ApplicationEvents = new List<ApplicationEvent>
-            {
+            ApplicationEvents =
+            [
                 new ApplicationEvent
                 {
                     Id = eventId,
                     Occurred = DateTime.UtcNow.AddDays(-5),
                     Description = "Old description"
                 }
-            }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
@@ -574,11 +574,11 @@ public class JobApplicationServiceTests
             Id = existingId,
             Company = "TechCorp",
             Position = "Engineer",
-            ApplicationEvents = new List<ApplicationEvent>
-            {
+            ApplicationEvents =
+            [
                 new ApplicationEvent { Id = eventId1, Occurred = DateTime.UtcNow, Description = "Event 1" },
                 new ApplicationEvent { Id = eventId2, Occurred = DateTime.UtcNow, Description = "Event 2" }
-            }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
@@ -639,7 +639,7 @@ public class JobApplicationServiceTests
     }
 
     [Fact]
-    public async Task UpdateAsync_WithNullStatusItems_ClearsAllStatusItems()
+    public async Task UpdateAsync_WithNullApplicationStatuses_ClearsAllStatuses()
     {
         // Arrange
         var existingId = Guid.NewGuid();
@@ -648,11 +648,11 @@ public class JobApplicationServiceTests
             Id = existingId,
             Company = "TechCorp",
             Position = "Engineer",
-            StatusItems = new List<StatusItem>
-            {
-                new StatusItem { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.Applied },
-                new StatusItem { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.Screen }
-            }
+            ApplicationStatuses = 
+            [
+                new ApplicationStatus { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.Applied },
+                new ApplicationStatus { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Status = StatusEnum.Screen }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
@@ -662,13 +662,13 @@ public class JobApplicationServiceTests
             Id: existingId,
             Company: "TechCorp",
             Position: "Engineer",
-            StatusItems: null);
+            ApplicationStatuses: null);
 
         // Act
         await _sut.UpdateAsync(dto);
 
         // Assert
-        existingEntity.StatusItems.Should().BeEmpty();
+        existingEntity.ApplicationStatuses.Should().BeEmpty();
     }
 
     [Fact]
@@ -681,11 +681,11 @@ public class JobApplicationServiceTests
             Id = existingId,
             Company = "TechCorp",
             Position = "Engineer",
-            ApplicationEvents = new List<ApplicationEvent>
-            {
+            ApplicationEvents =
+            [
                 new ApplicationEvent { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Description = "Event 1" },
                 new ApplicationEvent { Id = Guid.NewGuid(), Occurred = DateTime.UtcNow, Description = "Event 2" }
-            }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(existingId, It.IsAny<CancellationToken>()))
@@ -709,7 +709,7 @@ public class JobApplicationServiceTests
     {
         // Arrange
         var recruiterDto = new RecruiterDto("John Doe", "RecruiterCo", "john@email.com", "555-1234");
-        var statusItems = new List<StatusItemDto>
+        var statusItems = new List<ApplicationStatusDto>
         {
             new(DateTime.UtcNow, StatusEnum.Applied)
         };
@@ -728,7 +728,7 @@ public class JobApplicationServiceTests
             ReviewPage: "glassdoor.com",
             LoginNotes: "Use SSO",
             Recruiter: recruiterDto,
-            StatusItems: statusItems,
+            ApplicationStatuses: statusItems,
             ApplicationEvents: events);
 
         JobApplication? capturedEntity = null;
@@ -749,7 +749,7 @@ public class JobApplicationServiceTests
         capturedEntity.ReviewPage.Should().Be("glassdoor.com");
         capturedEntity.LoginNotes.Should().Be("Use SSO");
         capturedEntity.Recruiter.Should().NotBeNull();
-        capturedEntity.StatusItems.Should().HaveCount(1);
+        capturedEntity.ApplicationStatuses.Should().HaveCount(1);
         capturedEntity.ApplicationEvents.Should().HaveCount(1);
     }
 
@@ -762,7 +762,7 @@ public class JobApplicationServiceTests
     {
         // Arrange
         _mockRepository.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<JobApplication>());
+            .ReturnsAsync([]);
 
         // Act
         var result = await _sut.GetAllAsync();
@@ -778,8 +778,7 @@ public class JobApplicationServiceTests
         var createdAt = DateTime.UtcNow.AddDays(-10);
         var applications = new List<JobApplication>
         {
-            new JobApplication
-            {
+            new() {
                 Id = Guid.NewGuid(),
                 Company = "TechCorp",
                 Position = "Engineer",
@@ -807,22 +806,21 @@ public class JobApplicationServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ComputesCurrentStatus_FromLatestStatusItem()
+    public async Task GetAllAsync_ComputesCurrentStatus_FromLatestApplicationStatus()
     {
         // Arrange
         var applications = new List<JobApplication>
         {
-            new JobApplication
-            {
+            new() {
                 Id = Guid.NewGuid(),
                 Company = "TechCorp",
                 Position = "Engineer",
-                StatusItems = new List<StatusItem>
-                {
-                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-5), Status = StatusEnum.Applied },
-                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-2), Status = StatusEnum.Screen },
-                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-1), Status = StatusEnum.Interview }
-                }
+                ApplicationStatuses =
+                [
+                    new ApplicationStatus { Occurred = DateTime.UtcNow.AddDays(-5), Status = StatusEnum.Applied },
+                    new ApplicationStatus { Occurred = DateTime.UtcNow.AddDays(-2), Status = StatusEnum.Screen },
+                    new ApplicationStatus { Occurred = DateTime.UtcNow.AddDays(-1), Status = StatusEnum.Interview }
+                ]
             }
         };
 
@@ -839,7 +837,7 @@ public class JobApplicationServiceTests
     }
 
     [Fact]
-    public async Task GetAllAsync_ComputesAppliedDate_FromFirstAppliedStatusItem()
+    public async Task GetAllAsync_ComputesAppliedDate_FromFirstAppliedApplicationStatus()
     {
         // Arrange
         var appliedDate = DateTime.UtcNow.AddDays(-10);
@@ -851,11 +849,11 @@ public class JobApplicationServiceTests
                 Company = "TechCorp",
                 Position = "Engineer",
                 CreatedAt = DateTime.UtcNow.AddDays(-15),
-                StatusItems = new List<StatusItem>
-                {
-                    new StatusItem { Occurred = appliedDate, Status = StatusEnum.Applied },
-                    new StatusItem { Occurred = DateTime.UtcNow.AddDays(-5), Status = StatusEnum.Screen }
-                }
+                ApplicationStatuses =
+                [
+                    new ApplicationStatus { Occurred = appliedDate, Status = StatusEnum.Applied },
+                    new ApplicationStatus { Occurred = DateTime.UtcNow.AddDays(-5), Status = StatusEnum.Screen }
+                ]
             }
         };
 
@@ -892,8 +890,8 @@ public class JobApplicationServiceTests
             ReviewPage = "glassdoor.com",
             LoginNotes = "Use SSO",
             CreatedAt = createdAt,
-            StatusItems = new List<StatusItem>(),
-            ApplicationEvents = new List<ApplicationEvent>()
+            ApplicationStatuses = [],
+            ApplicationEvents = []
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
@@ -966,7 +964,7 @@ public class JobApplicationServiceTests
     }
 
     [Fact]
-    public async Task GetByIdAsync_MapsStatusItemsAndEvents()
+    public async Task GetByIdAsync_MapsApplicationStatusesAndEvents()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -977,14 +975,14 @@ public class JobApplicationServiceTests
             Id = id,
             Company = "TechCorp",
             Position = "Engineer",
-            StatusItems = new List<StatusItem>
-            {
-                new StatusItem { Id = statusItemId, Occurred = DateTime.UtcNow, Status = StatusEnum.Applied }
-            },
-            ApplicationEvents = new List<ApplicationEvent>
-            {
+            ApplicationStatuses =
+            [
+                new ApplicationStatus { Id = statusItemId, Occurred = DateTime.UtcNow, Status = StatusEnum.Applied }
+            ],
+            ApplicationEvents =
+            [
                 new ApplicationEvent { Id = eventId, Occurred = DateTime.UtcNow, Description = "Applied online" }
-            }
+            ]
         };
 
         _mockRepository.Setup(x => x.GetByIdAsync(id, It.IsAny<CancellationToken>()))
@@ -995,9 +993,9 @@ public class JobApplicationServiceTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.StatusItems.Should().HaveCount(1);
-        result.StatusItems.First().Id.Should().Be(statusItemId);
-        result.StatusItems.First().Status.Should().Be(StatusEnum.Applied);
+        result!.ApplicationStatuses.Should().HaveCount(1);
+        result.ApplicationStatuses.First().Id.Should().Be(statusItemId);
+        result.ApplicationStatuses.First().Status.Should().Be(StatusEnum.Applied);
         result.ApplicationEvents.Should().HaveCount(1);
         result.ApplicationEvents.First().Id.Should().Be(eventId);
         result.ApplicationEvents.First().Description.Should().Be("Applied online");

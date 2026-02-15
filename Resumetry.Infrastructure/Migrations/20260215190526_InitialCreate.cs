@@ -35,8 +35,8 @@ namespace Resumetry.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Company = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
                     Position = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Salary = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Salary = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true),
                     TopJob = table.Column<bool>(type: "INTEGER", nullable: false),
                     SourcePage = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
                     ReviewPage = table.Column<string>(type: "TEXT", maxLength: 500, nullable: true),
@@ -61,7 +61,7 @@ namespace Resumetry.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Date = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Occurred = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     JobApplicationId = table.Column<Guid>(type: "TEXT", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -79,7 +79,7 @@ namespace Resumetry.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "StatusItems",
+                name: "ApplicationStatuses",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -91,9 +91,9 @@ namespace Resumetry.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StatusItems", x => x.Id);
+                    table.PrimaryKey("PK_ApplicationStatuses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StatusItems_JobApplications_JobApplicationId",
+                        name: "FK_ApplicationStatuses_JobApplications_JobApplicationId",
                         column: x => x.JobApplicationId,
                         principalTable: "JobApplications",
                         principalColumn: "Id",
@@ -106,14 +106,14 @@ namespace Resumetry.Infrastructure.Migrations
                 column: "JobApplicationId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ApplicationStatuses_JobApplicationId",
+                table: "ApplicationStatuses",
+                column: "JobApplicationId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JobApplications_RecruiterId",
                 table: "JobApplications",
                 column: "RecruiterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StatusItems_JobApplicationId",
-                table: "StatusItems",
-                column: "JobApplicationId");
         }
 
         /// <inheritdoc />
@@ -123,7 +123,7 @@ namespace Resumetry.Infrastructure.Migrations
                 name: "ApplicationEvents");
 
             migrationBuilder.DropTable(
-                name: "StatusItems");
+                name: "ApplicationStatuses");
 
             migrationBuilder.DropTable(
                 name: "JobApplications");

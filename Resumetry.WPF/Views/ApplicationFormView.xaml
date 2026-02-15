@@ -177,7 +177,7 @@
                             </Grid>
 
                             <!-- Status Items -->
-                            <ItemsControl Grid.Row="1" ItemsSource="{Binding StatusItems}" AlternationCount="100">
+                            <ItemsControl Grid.Row="1" ItemsSource="{Binding ApplicationStatuses}" AlternationCount="100">
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="{StaticResource LightGrayBrush}"

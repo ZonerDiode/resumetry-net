@@ -11,7 +11,7 @@ namespace Resumetry.Infrastructure.Data.Repositories
             return await context.JobApplications
                 .Include(ja => ja.Recruiter)
                 .Include(ja => ja.ApplicationEvents)
-                .Include(ja => ja.StatusItems)
+                .Include(ja => ja.ApplicationStatuses)
                 .FirstOrDefaultAsync(ja => ja.Id == id, cancellationToken);
         }
 
@@ -20,7 +20,7 @@ namespace Resumetry.Infrastructure.Data.Repositories
             return await context.JobApplications
                 .Include(ja => ja.Recruiter)
                 .Include(ja => ja.ApplicationEvents)
-                .Include(ja => ja.StatusItems)
+                .Include(ja => ja.ApplicationStatuses)
                 .OrderByDescending(ja => ja.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
