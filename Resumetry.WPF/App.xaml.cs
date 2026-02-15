@@ -49,7 +49,7 @@ namespace Resumetry
 
             // Register services
             services.AddSingleton<IFileService, FileService>();
-            services.AddScoped<IImportService, ImportService>();
+            services.AddScoped<IImportService, LegacyImportService>();
             services.AddScoped<IExportService, ExportService>();
             services.AddScoped<IJobApplicationService, JobApplicationService>();
 

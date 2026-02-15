@@ -9,17 +9,17 @@ using Xunit;
 namespace Resumetry.Application.Tests.Services;
 
 /// <summary>
-/// Tests for ImportService following TDD Red/Green/Refactor approach.
+/// Tests for LegacyImportService following TDD Red/Green/Refactor approach.
 /// </summary>
-public class ImportServiceTests
+public class LegacyImportServiceTests
 {
     private readonly Mock<IFileService> _mockFileService;
-    private readonly ImportService _sut;
+    private readonly LegacyImportService _sut;
 
-    public ImportServiceTests()
+    public LegacyImportServiceTests()
     {
         _mockFileService = new Mock<IFileService>();
-        _sut = new ImportService(_mockFileService.Object);
+        _sut = new LegacyImportService(_mockFileService.Object);
     }
 
     #region ImportFromJsonAsync Tests

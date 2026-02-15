@@ -16,7 +16,7 @@ namespace Resumetry.ViewModels
         private string _statusMessage = string.Empty;
 
         [RelayCommand]
-        private async Task ImportFromJsonAsync()
+        private async Task ImportFromLegacyJsonAsync()
         {
             var openFileDialog = new OpenFileDialog
             {
