@@ -25,7 +25,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Title and Action Buttons -->
@@ -52,25 +51,39 @@
 
                 <!-- Basic Information Section -->
                 <Border Grid.Row="1" Background="{StaticResource LightBlueBrush}"
-                        Padding="24" Margin="0,0,0,16" CornerRadius="4">
+                        Padding="24" Margin="0,0,0,12" CornerRadius="4">
                     <Grid>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="12"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="12"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- Section Header -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
-                                   Text="Basic Information"
-                                   Style="{StaticResource SectionHeaderStyle}"
-                                   Margin="0,0,0,16"/>
+                        <!-- Section Header with Top Job Checkbox -->
+                        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="Basic Information"
+                                       Style="{StaticResource SectionHeaderStyle}"/>
+
+                            <CheckBox Grid.Column="1"
+                                      IsChecked="{Binding MarkAsTopJob}"
+                                      Content="Top Job"
+                                      VerticalAlignment="Center"
+                                      FontSize="14"
+                                      FontWeight="SemiBold"/>
+                        </Grid>
 
                         <!-- Company -->
                         <StackPanel Grid.Row="1" Grid.Column="0">
@@ -88,8 +101,17 @@
                                      Height="36"/>
                         </StackPanel>
 
+                        <!-- Salary -->
+                        <StackPanel Grid.Row="1" Grid.Column="4">
+                            <TextBlock Text="Salary" Style="{StaticResource FormLabelStyle}"/>
+                            <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ModernTextBoxStyle}"
+                                     helpers:WatermarkHelper.Watermark="e.g., $80,000 - $100,000"
+                                     Height="36"/>
+                        </StackPanel>
+
                         <!-- Recruiter Name -->
-                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,16,0,0">
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,4,0,0">
                             <TextBlock Text="Recruiter Name" Style="{StaticResource FormLabelStyle}"/>
                             <TextBox Text="{Binding RecruiterName, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{StaticResource ModernTextBoxStyle}"
@@ -98,7 +120,7 @@
                         </StackPanel>
 
                         <!-- Recruiter Company -->
-                        <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,16,0,0">
+                        <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,4,0,0">
                             <TextBlock Text="Recruiter Company" Style="{StaticResource FormLabelStyle}"/>
                             <TextBox Text="{Binding RecruiterCompany, UpdateSourceTrigger=PropertyChanged}"
                                      Style="{StaticResource ModernTextBoxStyle}"
@@ -106,54 +128,27 @@
                                      Height="36"/>
                         </StackPanel>
 
-                        <!-- Bottom Row: Applied Date, Salary, Top Job -->
-                        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,16,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Applied Date -->
-                            <StackPanel Grid.Column="0">
-                                <TextBlock Text="Applied Date *" Style="{StaticResource FormLabelStyle}"/>
-                                <DatePicker SelectedDate="{Binding CreatedAt}"
-                                            Style="{StaticResource ModernDatePickerStyle}"
-                                            Height="36"/>
-                            </StackPanel>
-
-                            <!-- Salary -->
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Salary" Style="{StaticResource FormLabelStyle}"/>
-                                <TextBox Text="{Binding Salary, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource ModernTextBoxStyle}"
-                                         helpers:WatermarkHelper.Watermark="e.g., $80,000 - $100,000"
-                                         Height="36"/>
-                            </StackPanel>
-
-                            <!-- Mark as Top Job -->
-                            <CheckBox Grid.Column="4"
-                                      IsChecked="{Binding MarkAsTopJob}"
-                                      Content="Mark as Top Job"
-                                      VerticalAlignment="Bottom"
-                                      Margin="0,0,0,8"
-                                      FontSize="14"/>
-                        </Grid>
+                        <!-- Recruiter Phone -->
+                        <StackPanel Grid.Row="2" Grid.Column="4" Margin="0,4,0,0">
+                            <TextBlock Text="Recruiter Phone" Style="{StaticResource FormLabelStyle}"/>
+                            <TextBox Text="{Binding RecruiterPhone, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ModernTextBoxStyle}"
+                                     helpers:WatermarkHelper.Watermark="e.g., (555) 123-4567"
+                                     Height="36"/>
+                        </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Status and Notes Side by Side -->
-                <Grid Grid.Row="2" Margin="0,0,0,16">
+                <Grid Grid.Row="2" Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="320"/>
-                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="12"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <!-- Status Section -->
-                    <Border Grid.Column="0" Background="White" CornerRadius="4" Padding="12">
+                    <Border Grid.Column="0" Background="{StaticResource LightBlueBrush}" CornerRadius="4" Padding="12">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -161,7 +156,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- Header with Add Button -->
-                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid Grid.Row="0" Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -177,8 +172,8 @@
                                         Content="+ Add"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Command="{Binding AddStatusCommand}"
-                                        Height="32"
-                                        Padding="12,4"/>
+                                        Height="28"
+                                        Padding="8,4"/>
                             </Grid>
 
                             <!-- Status Items -->
@@ -187,60 +182,45 @@
                                     <DataTemplate>
                                         <Border Background="{StaticResource LightGrayBrush}"
                                                 CornerRadius="4"
-                                                Padding="8"
-                                                Margin="0,0,0,12">
+                                                Padding="10"
+                                                Margin="0,0,0,4">
                                             <Grid>
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
-                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="8"/>
+                                                    <ColumnDefinition Width="36"/>
+                                                </Grid.ColumnDefinitions>
 
-                                                <!-- Header -->
-                                                <Grid Grid.Row="0" Margin="0,0,0,4">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
-                                                    </Grid.ColumnDefinitions>
+                                                <!-- Date (no label) -->
+                                                <DatePicker Grid.Column="0"
+                                                            SelectedDate="{Binding Occurred}"
+                                                            Style="{StaticResource ModernDatePickerStyle}"
+                                                            Height="36"
+                                                            VerticalAlignment="Center"/>
 
-                                                    <TextBlock Grid.Column="0"
-                                                               FontWeight="SemiBold"
-                                                               FontSize="14">
-                                                        <Run Text="Status "/>
-                                                        <Run Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay, Converter={StaticResource IndexPlusOneConverter}}"/>
-                                                    </TextBlock>
+                                                <!-- Status (no label) -->
+                                                <ComboBox Grid.Column="2"
+                                                          SelectedItem="{Binding Status}"
+                                                          ItemsSource="{Binding AvailableStatuses}"
+                                                          Style="{StaticResource ModernComboBoxStyle}"
+                                                          Height="36"
+                                                          VerticalAlignment="Center"/>
 
-                                                    <Button Grid.Column="1"
-                                                            Content="Remove"
-                                                            Style="{StaticResource DangerButtonStyle}"
-                                                            Command="{Binding DataContext.RemoveStatusCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                            CommandParameter="{Binding}"
-                                                            Height="28"
-                                                            Padding="12,4"/>
-                                                </Grid>
-
-                                                <!-- Fields -->
-                                                <Grid Grid.Row="1">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="16"/>
-                                                        <ColumnDefinition Width="*"/>
-                                                    </Grid.ColumnDefinitions>
-
-                                                    <StackPanel Grid.Column="0">
-                                                        <TextBlock Text="Date" Style="{StaticResource FormLabelStyle}"/>
-                                                        <DatePicker SelectedDate="{Binding Occurred}"
-                                                                    Style="{StaticResource ModernDatePickerStyle}"
-                                                                    Height="36"/>
-                                                    </StackPanel>
-
-                                                    <StackPanel Grid.Column="2">
-                                                        <TextBlock Text="Status" Style="{StaticResource FormLabelStyle}"/>
-                                                        <ComboBox SelectedItem="{Binding Status}"
-                                                                  ItemsSource="{Binding AvailableStatuses}"
-                                                                  Style="{StaticResource ModernComboBoxStyle}"
-                                                                  Height="36"/>
-                                                    </StackPanel>
-                                                </Grid>
+                                                <!-- Remove button -->
+                                                <Button Grid.Column="4"
+                                                        Content="−"
+                                                        Style="{StaticResource DangerButtonStyle}"
+                                                        Command="{Binding DataContext.RemoveStatusCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding}"
+                                                        Width="36"
+                                                        Height="36"
+                                                        FontSize="18"
+                                                        FontWeight="Bold"
+                                                        Padding="0"
+                                                        VerticalAlignment="Center"
+                                                        ToolTip="Remove status"/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -250,7 +230,7 @@
                     </Border>
 
                     <!-- Notes Section -->
-                    <Border Grid.Column="2" Background="White" CornerRadius="4" Padding="12">
+                    <Border Grid.Column="2" Background="{StaticResource LightBlueBrush}" CornerRadius="4" Padding="12">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
@@ -258,7 +238,7 @@
                             </Grid.RowDefinitions>
 
                             <!-- Header with Add Button -->
-                            <Grid Grid.Row="0" Margin="0,0,0,12">
+                            <Grid Grid.Row="0" Margin="0,0,0,8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
@@ -274,8 +254,8 @@
                                         Content="+ Add"
                                         Style="{StaticResource PrimaryButtonStyle}"
                                         Command="{Binding AddNoteCommand}"
-                                        Height="32"
-                                        Padding="12,4"/>
+                                        Height="28"
+                                        Padding="8,4"/>
                             </Grid>
 
                             <!-- Notes Items -->
@@ -284,57 +264,53 @@
                                     <DataTemplate>
                                         <Border Background="{StaticResource LightGrayBrush}"
                                                 CornerRadius="4"
-                                                Padding="8"
-                                                Margin="0,0,0,12">
+                                                Padding="10"
+                                                Margin="0,0,0,4">
                                             <Grid>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
                                                     <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
                                                 </Grid.RowDefinitions>
 
-                                                <!-- Header -->
-                                                <Grid Grid.Row="0" Margin="0,0,0,4">
+                                                <!-- Date and Remove Button Row -->
+                                                <Grid Grid.Row="0" Margin="0,0,0,6">
                                                     <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="110"/>
                                                         <ColumnDefinition Width="*"/>
-                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="36"/>
                                                     </Grid.ColumnDefinitions>
 
-                                                    <TextBlock Grid.Column="0"
-                                                               FontWeight="SemiBold"
-                                                               FontSize="14">
-                                                        <Run Text="Note "/>
-                                                        <Run Text="{Binding Path=(ItemsControl.AlternationIndex), RelativeSource={RelativeSource AncestorType=ContentPresenter}, Mode=OneWay, Converter={StaticResource IndexPlusOneConverter}}"/>
-                                                    </TextBlock>
+                                                    <!-- Date (no label) -->
+                                                    <DatePicker Grid.Column="0"
+                                                                SelectedDate="{Binding Occurred}"
+                                                                Style="{StaticResource ModernDatePickerStyle}"
+                                                                Height="36"
+                                                                VerticalAlignment="Center"/>
 
-                                                    <Button Grid.Column="1"
-                                                            Content="Remove"
+                                                    <!-- Remove button -->
+                                                    <Button Grid.Column="2"
+                                                            Content="−"
                                                             Style="{StaticResource DangerButtonStyle}"
                                                             Command="{Binding DataContext.RemoveNoteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Height="28"
-                                                            Padding="12,4"/>
+                                                            Width="36"
+                                                            Height="36"
+                                                            FontSize="18"
+                                                            FontWeight="Bold"
+                                                            Padding="0"
+                                                            VerticalAlignment="Center"
+                                                            ToolTip="Remove note"/>
                                                 </Grid>
 
-                                                <!-- Date Field -->
-                                                <StackPanel Grid.Row="1" Margin="0,0,0,12">
-                                                    <TextBlock Text="Date" Style="{StaticResource FormLabelStyle}"/>
-                                                    <DatePicker SelectedDate="{Binding Occurred}"
-                                                                Style="{StaticResource ModernDatePickerStyle}"
-                                                                Height="36"/>
-                                                </StackPanel>
-
-                                                <!-- Description Field -->
-                                                <StackPanel Grid.Row="2">
-                                                    <TextBlock Text="Description" Style="{StaticResource FormLabelStyle}"/>
-                                                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                                             TextWrapping="Wrap"
-                                                             AcceptsReturn="True"
-                                                             Height="80"
-                                                             VerticalScrollBarVisibility="Auto"
-                                                             Style="{StaticResource ModernTextBoxStyle}"
-                                                             helpers:WatermarkHelper.Watermark="What happened on this date..."/>
-                                                </StackPanel>
+                                                <!-- Description Field (no label) -->
+                                                <TextBox Grid.Row="1"
+                                                         Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                         TextWrapping="Wrap"
+                                                         AcceptsReturn="True"
+                                                         Height="50"
+                                                         VerticalScrollBarVisibility="Auto"
+                                                         Style="{StaticResource ModernTextBoxStyle}"
+                                                         helpers:WatermarkHelper.Watermark="What happened..."/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -353,49 +329,57 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
                         <!-- Section Header -->
                         <TextBlock Grid.Row="0"
                                    Text="Additional Information"
                                    Style="{StaticResource SectionHeaderStyle}"
-                                   Margin="0,0,0,16"/>
+                                   Margin="0,0,0,12"/>
 
-                        <!-- Source Page URL -->
-                        <StackPanel Grid.Row="1" Margin="0,0,0,16">
-                            <TextBlock Text="Source Page URL" Style="{StaticResource FormLabelStyle}"/>
-                            <TextBox Text="{Binding SourcePageUrl, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource ModernTextBoxStyle}"
-                                     helpers:WatermarkHelper.Watermark="https://..."
-                                     Height="36"/>
-                        </StackPanel>
+                        <!-- URL Fields Side by Side -->
+                        <Grid Grid.Row="1" Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                        <!-- Review Page URL -->
-                        <StackPanel Grid.Row="2" Margin="0,0,0,16">
-                            <TextBlock Text="Review Page URL" Style="{StaticResource FormLabelStyle}"/>
-                            <TextBox Text="{Binding ReviewPageUrl, UpdateSourceTrigger=PropertyChanged}"
-                                     Style="{StaticResource ModernTextBoxStyle}"
-                                     helpers:WatermarkHelper.Watermark="https://..."
-                                     Height="36"/>
-                        </StackPanel>
+                            <!-- Source Page URL -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Source Page URL" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding SourcePageUrl, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource ModernTextBoxStyle}"
+                                         helpers:WatermarkHelper.Watermark="https://..."
+                                         Height="36"/>
+                            </StackPanel>
+
+                            <!-- Review Page URL -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Review Page URL" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding ReviewPageUrl, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource ModernTextBoxStyle}"
+                                         helpers:WatermarkHelper.Watermark="https://..."
+                                         Height="36"/>
+                            </StackPanel>
+                        </Grid>
 
                         <!-- Login Hints -->
-                        <StackPanel Grid.Row="3" Margin="0,0,0,16">
+                        <StackPanel Grid.Row="2" Margin="0,0,0,4">
                             <TextBlock Text="Login Hints" Style="{StaticResource FormLabelStyle}"/>
                             <TextBox Text="{Binding LoginHints, UpdateSourceTrigger=PropertyChanged}"
                                      TextWrapping="Wrap"
                                      AcceptsReturn="True"
-                                     Height="40"
+                                     Height="32"
                                      VerticalScrollBarVisibility="Auto"
                                      Style="{StaticResource ModernTextBoxStyle}"
-                                     helpers:WatermarkHelper.Watermark="Notes about accessing the company portal..."/>
+                                     helpers:WatermarkHelper.Watermark="Portal access notes..."/>
                         </StackPanel>
 
-                        <!-- Description -->
-                        <StackPanel Grid.Row="4">
+                        <!-- Description (Maximized Height) -->
+                        <StackPanel Grid.Row="3">
                             <TextBlock Text="Description" Style="{StaticResource FormLabelStyle}"/>
-                            <Border Height="250" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+                            <Border Height="450" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
                                 <Grid>
                                     <wv2:WebView2 x:Name="DescriptionWebView"
                                                   CoreWebView2InitializationCompleted="DescriptionWebView_CoreWebView2InitializationCompleted"/>
