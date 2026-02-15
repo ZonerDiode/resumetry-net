@@ -84,11 +84,8 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         ValidateDto(dto.Company, dto.Position);
 
         // Load existing entity
-        var entity = await _unitOfWork.JobApplications.GetByIdAsync(dto.Id, cancellationToken);
-        if (entity is null)
-        {
-            throw new KeyNotFoundException($"Job application with ID {dto.Id} not found.");
-        }
+        var entity = await _unitOfWork.JobApplications.GetByIdAsync(dto.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Job application with ID {dto.Id} not found.");
 
         // Update scalar properties
         entity.Company = dto.Company;
@@ -112,116 +109,6 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         // Persist
         _unitOfWork.JobApplications.Update(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-    }
-
-    private static void SyncRecruiter(JobApplication entity, RecruiterDto? recruiterDto)
-    {
-        if (recruiterDto is null)
-        {
-            // Remove recruiter
-            entity.Recruiter = null;
-        }
-        else if (entity.Recruiter is null)
-        {
-            // Create new recruiter
-            entity.Recruiter = new Recruiter
-            {
-                Name = recruiterDto.Name,
-                Company = recruiterDto.Company,
-                Email = recruiterDto.Email,
-                Phone = recruiterDto.Phone
-            };
-        }
-        else
-        {
-            // Update existing recruiter
-            entity.Recruiter.Name = recruiterDto.Name;
-            entity.Recruiter.Company = recruiterDto.Company;
-            entity.Recruiter.Email = recruiterDto.Email;
-            entity.Recruiter.Phone = recruiterDto.Phone;
-        }
-    }
-
-    private static void SyncStatusItems(JobApplication entity, List<StatusItemDto>? statusItemsDto)
-    {
-        if (statusItemsDto is null)
-        {
-            statusItemsDto = [];
-        }
-
-        // Remove items not in the DTO list
-        var itemsToRemove = entity.StatusItems
-            .Where(existing => !statusItemsDto.Any(dto => dto.Id == existing.Id))
-            .ToList();
-        foreach (var item in itemsToRemove)
-        {
-            entity.StatusItems.Remove(item);
-        }
-
-        // Update existing or add new items
-        foreach (var dto in statusItemsDto)
-        {
-            if (dto.Id.HasValue)
-            {
-                // Update existing
-                var existing = entity.StatusItems.FirstOrDefault(x => x.Id == dto.Id);
-                if (existing is not null)
-                {
-                    existing.Occurred = dto.Occurred;
-                    existing.Status = dto.Status;
-                }
-            }
-            else
-            {
-                // Add new
-                entity.StatusItems.Add(new StatusItem
-                {
-                    Occurred = dto.Occurred,
-                    Status = dto.Status
-                });
-            }
-        }
-    }
-
-    private static void SyncApplicationEvents(JobApplication entity, List<ApplicationEventDto>? eventsDto)
-    {
-        if (eventsDto is null)
-        {
-            eventsDto = [];
-        }
-
-        // Remove events not in the DTO list
-        var eventsToRemove = entity.ApplicationEvents
-            .Where(existing => !eventsDto.Any(dto => dto.Id == existing.Id))
-            .ToList();
-        foreach (var evt in eventsToRemove)
-        {
-            entity.ApplicationEvents.Remove(evt);
-        }
-
-        // Update existing or add new events
-        foreach (var dto in eventsDto)
-        {
-            if (dto.Id.HasValue)
-            {
-                // Update existing
-                var existing = entity.ApplicationEvents.FirstOrDefault(x => x.Id == dto.Id);
-                if (existing is not null)
-                {
-                    existing.Occurred = dto.Occurred;
-                    existing.Description = dto.Description;
-                }
-            }
-            else
-            {
-                // Add new
-                entity.ApplicationEvents.Add(new ApplicationEvent
-                {
-                    Occurred = dto.Occurred,
-                    Description = dto.Description
-                });
-            }
-        }
     }
 
     /// <inheritdoc />
@@ -301,11 +188,8 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken);
-        if (entity is null)
-        {
-            throw new KeyNotFoundException($"Job application with ID {id} not found.");
-        }
+        var entity = await _unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Job application with ID {id} not found.");
 
         _unitOfWork.JobApplications.Delete(entity);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -321,6 +205,111 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         if (string.IsNullOrWhiteSpace(position))
         {
             throw new ArgumentException("Position is required.", nameof(position));
+        }
+    }
+
+
+    private static void SyncRecruiter(JobApplication entity, RecruiterDto? recruiterDto)
+    {
+        if (recruiterDto is null)
+        {
+            // Remove recruiter
+            entity.Recruiter = null;
+        }
+        else if (entity.Recruiter is null)
+        {
+            // Create new recruiter
+            entity.Recruiter = new Recruiter
+            {
+                Name = recruiterDto.Name,
+                Company = recruiterDto.Company,
+                Email = recruiterDto.Email,
+                Phone = recruiterDto.Phone
+            };
+        }
+        else
+        {
+            // Update existing recruiter
+            entity.Recruiter.Name = recruiterDto.Name;
+            entity.Recruiter.Company = recruiterDto.Company;
+            entity.Recruiter.Email = recruiterDto.Email;
+            entity.Recruiter.Phone = recruiterDto.Phone;
+        }
+    }
+
+    private static void SyncStatusItems(JobApplication entity, List<StatusItemDto>? statusItemsDto)
+    {
+        statusItemsDto ??= [];
+
+        // Remove items not in the DTO list
+        var itemsToRemove = entity.StatusItems
+            .Where(existing => !statusItemsDto.Any(dto => dto.Id == existing.Id))
+            .ToList();
+        foreach (var item in itemsToRemove)
+        {
+            entity.StatusItems.Remove(item);
+        }
+
+        // Update existing or add new items
+        foreach (var dto in statusItemsDto)
+        {
+            if (dto.Id.HasValue)
+            {
+                // Update existing
+                var existing = entity.StatusItems.FirstOrDefault(x => x.Id == dto.Id);
+                if (existing is not null)
+                {
+                    existing.Occurred = dto.Occurred;
+                    existing.Status = dto.Status;
+                }
+            }
+            else
+            {
+                // Add new
+                entity.StatusItems.Add(new StatusItem
+                {
+                    Occurred = dto.Occurred,
+                    Status = dto.Status
+                });
+            }
+        }
+    }
+
+    private static void SyncApplicationEvents(JobApplication entity, List<ApplicationEventDto>? eventsDto)
+    {
+        eventsDto ??= [];
+
+        // Remove events not in the DTO list
+        var eventsToRemove = entity.ApplicationEvents
+            .Where(existing => !eventsDto.Any(dto => dto.Id == existing.Id))
+            .ToList();
+        foreach (var evt in eventsToRemove)
+        {
+            entity.ApplicationEvents.Remove(evt);
+        }
+
+        // Update existing or add new events
+        foreach (var dto in eventsDto)
+        {
+            if (dto.Id.HasValue)
+            {
+                // Update existing
+                var existing = entity.ApplicationEvents.FirstOrDefault(x => x.Id == dto.Id);
+                if (existing is not null)
+                {
+                    existing.Occurred = dto.Occurred;
+                    existing.Description = dto.Description;
+                }
+            }
+            else
+            {
+                // Add new
+                entity.ApplicationEvents.Add(new ApplicationEvent
+                {
+                    Occurred = dto.Occurred,
+                    Description = dto.Description
+                });
+            }
         }
     }
 }

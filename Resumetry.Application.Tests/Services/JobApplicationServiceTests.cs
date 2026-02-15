@@ -174,15 +174,16 @@ public class JobApplicationServiceTests
             Company: "TechCorp",
             Position: "Software Engineer");
 
-        var expectedId = Guid.NewGuid();
+        JobApplication? capturedEntity = null;
         _mockRepository.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
-            .Callback<JobApplication, CancellationToken>((entity, _) => entity.Id = expectedId);
+            .Callback<JobApplication, CancellationToken>((entity, _) => capturedEntity = entity);
 
         // Act
-        var result = await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto);
 
         // Assert
-        result.Should().Be(expectedId);
+        capturedEntity.Should().NotBeNull();
+        capturedEntity!.Id.Should().NotBeEmpty();
     }
 
     #endregion

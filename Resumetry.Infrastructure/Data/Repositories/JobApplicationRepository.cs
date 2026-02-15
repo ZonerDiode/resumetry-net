@@ -25,28 +25,6 @@ namespace Resumetry.Infrastructure.Data.Repositories
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<JobApplication>> GetTopJobsAsync(CancellationToken cancellationToken = default)
-        {
-            return await context.JobApplications
-                .Include(ja => ja.Recruiter)
-                .Include(ja => ja.ApplicationEvents)
-                .Include(ja => ja.StatusItems)
-                .Where(ja => ja.TopJob)
-                .OrderByDescending(ja => ja.CreatedAt)
-                .ToListAsync(cancellationToken);
-        }
-
-        public async Task<IEnumerable<JobApplication>> GetByCompanyAsync(string company, CancellationToken cancellationToken = default)
-        {
-            return await context.JobApplications
-                .Include(ja => ja.Recruiter)
-                .Include(ja => ja.ApplicationEvents)
-                .Include(ja => ja.StatusItems)
-                .Where(ja => ja.Company.Contains(company))
-                .OrderByDescending(ja => ja.CreatedAt)
-                .ToListAsync(cancellationToken);
-        }
-
         public async Task AddAsync(JobApplication jobApplication, CancellationToken cancellationToken = default)
         {
             await context.JobApplications.AddAsync(jobApplication, cancellationToken);
