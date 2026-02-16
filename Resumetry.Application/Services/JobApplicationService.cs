@@ -110,11 +110,11 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<JobApplicationSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<JobApplicationSummaryDto>> GetAllJobSummaryAsync(CancellationToken cancellationToken = default)
     {
         var entities = await unitOfWork.JobApplications.GetAllAsync(cancellationToken);
 
-        return entities.Select(entity =>
+        List<JobApplicationSummaryDto> dtos = [.. entities.Select(entity =>
         {
             // Compute current status from latest ApplicationStatus
             var latestApplicationStatus = entity.ApplicationStatuses
@@ -139,9 +139,22 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
                 CreatedAt: entity.CreatedAt,
                 CurrentStatus: currentStatus,
                 CurrentStatusText: currentStatusText,
-                AppliedDate: appliedDate
+                AppliedDate: appliedDate,
+                Recruiter: entity.Recruiter is null ? null : new RecruiterDto(
+                    Name: entity.Recruiter.Name,
+                    Company: entity.Recruiter.Company,
+                    Email: entity.Recruiter.Email,
+                    Phone: entity.Recruiter.Phone
+                ),
+                ApplicationEvents: [.. entity.ApplicationEvents.Select(e => new ApplicationEventDto(
+                    Occurred: e.Occurred,
+                    Description: e.Description,
+                    Id: e.Id
+                ))]
             );
-        }).ToList();
+        })];
+
+        return dtos.OrderByDescending(d => d.AppliedDate);
     }
 
     /// <inheritdoc />
@@ -170,16 +183,16 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
                 Email: entity.Recruiter.Email,
                 Phone: entity.Recruiter.Phone
             ),
-            ApplicationStatuses: entity.ApplicationStatuses.Select(s => new ApplicationStatusDto(
+            ApplicationStatuses: [.. entity.ApplicationStatuses.Select(s => new ApplicationStatusDto(
                 Occurred: s.Occurred,
                 Status: s.Status,
                 Id: s.Id
-            )).ToList(),
-            ApplicationEvents: entity.ApplicationEvents.Select(e => new ApplicationEventDto(
+            ))],
+            ApplicationEvents: [.. entity.ApplicationEvents.Select(e => new ApplicationEventDto(
                 Occurred: e.Occurred,
                 Description: e.Description,
                 Id: e.Id
-            )).ToList()
+            ))]
         );
     }
 
@@ -240,13 +253,10 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         statusItemsDto ??= [];
 
         // Remove items not in the DTO list
-        var itemsToRemove = entity.ApplicationStatuses
+        entity.ApplicationStatuses
             .Where(existing => !statusItemsDto.Any(dto => dto.Id == existing.Id))
-            .ToList();
-        foreach (var item in itemsToRemove)
-        {
-            entity.ApplicationStatuses.Remove(item);
-        }
+            .ToList()
+            .ForEach(item => entity.ApplicationStatuses.Remove(item));
 
         // Update existing or add new items
         foreach (var dto in statusItemsDto)
@@ -278,13 +288,10 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         eventsDto ??= [];
 
         // Remove events not in the DTO list
-        var eventsToRemove = entity.ApplicationEvents
+        entity.ApplicationEvents
             .Where(existing => !eventsDto.Any(dto => dto.Id == existing.Id))
-            .ToList();
-        foreach (var evt in eventsToRemove)
-        {
-            entity.ApplicationEvents.Remove(evt);
-        }
+            .ToList()
+            .ForEach(evt => entity.ApplicationEvents.Remove(evt));
 
         // Update existing or add new events
         foreach (var dto in eventsDto)

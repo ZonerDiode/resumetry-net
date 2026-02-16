@@ -27,7 +27,7 @@ public interface IJobApplicationService
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Collection of job application summaries.</returns>
-    Task<IEnumerable<JobApplicationSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<JobApplicationSummaryDto>> GetAllJobSummaryAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a single job application by ID with full details.

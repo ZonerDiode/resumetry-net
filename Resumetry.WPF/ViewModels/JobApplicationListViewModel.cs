@@ -43,7 +43,7 @@ namespace Resumetry.ViewModels
             try
             {
                 var summaryDtos = await scopedRunner.RunAsync<IJobApplicationService, IEnumerable<Application.DTOs.JobApplicationSummaryDto>>(
-                    async svc => await svc.GetAllAsync());
+                    async svc => await svc.GetAllJobSummaryAsync());
 
                 foreach (var summaryDto in summaryDtos)
                 {

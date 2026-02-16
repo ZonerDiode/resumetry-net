@@ -14,4 +14,6 @@ public record JobApplicationSummaryDto(
     DateTime CreatedAt,
     StatusEnum? CurrentStatus,
     string CurrentStatusText,
-    DateTime? AppliedDate);
+    DateTime? AppliedDate,
+    RecruiterDto? Recruiter,
+    List<ApplicationEventDto> ApplicationEvents);

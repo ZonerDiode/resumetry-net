@@ -59,7 +59,9 @@ public class JobApplicationListViewModelTests
                 DateTime.Now,
                 StatusEnum.Applied,
                 "Applied",
-                DateTime.Now)
+                DateTime.Now,
+                null,
+                [])
         };
 
         _mockScopedRunner
@@ -109,7 +111,9 @@ public class JobApplicationListViewModelTests
                 DateTime.Now,
                 StatusEnum.Applied,
                 "Applied",
-                DateTime.Now),
+                DateTime.Now,
+                null,
+                []),
             new(
                 Guid.NewGuid(),
                 "Company B",
@@ -119,7 +123,9 @@ public class JobApplicationListViewModelTests
                 DateTime.Now,
                 StatusEnum.Applied,
                 "Applied",
-                DateTime.Now)
+                DateTime.Now,
+                null,
+                [])
         };
 
         _mockScopedRunner
@@ -174,7 +180,9 @@ public class JobApplicationListViewModelTests
                 DateTime.Now,
                 StatusEnum.Applied,
                 "Applied",
-                DateTime.Now)
+                DateTime.Now,
+                null,
+                [])
         };
 
         _mockScopedRunner
@@ -219,7 +227,9 @@ public class JobApplicationListViewModelTests
                 DateTime.Now,
                 StatusEnum.Applied,
                 "Applied",
-                DateTime.Now)
+                DateTime.Now,
+                null,
+                [])
         };
 
         _mockScopedRunner
@@ -275,7 +285,9 @@ public class JobApplicationListViewModelTests
                 DateTime.Now,
                 StatusEnum.Applied,
                 "Applied",
-                DateTime.Now)
+                DateTime.Now,
+                null,
+                [])
         };
 
         _mockScopedRunner

@@ -765,7 +765,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync([]);
 
         // Act
-        var result = await _sut.GetAllAsync();
+        var result = await _sut.GetAllJobSummaryAsync();
 
         // Assert
         result.Should().BeEmpty();
@@ -792,7 +792,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(applications);
 
         // Act
-        var result = await _sut.GetAllAsync();
+        var result = await _sut.GetAllJobSummaryAsync();
 
         // Assert
         result.Should().HaveCount(1);
@@ -828,7 +828,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(applications);
 
         // Act
-        var result = await _sut.GetAllAsync();
+        var result = await _sut.GetAllJobSummaryAsync();
 
         // Assert
         var dto = result.First();
@@ -861,7 +861,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(applications);
 
         // Act
-        var result = await _sut.GetAllAsync();
+        var result = await _sut.GetAllJobSummaryAsync();
 
         // Assert
         var dto = result.First();
