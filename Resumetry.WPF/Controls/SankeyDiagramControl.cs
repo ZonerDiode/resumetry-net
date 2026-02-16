@@ -65,12 +65,12 @@ namespace Resumetry.WPF.Controls
             var nodes = new Dictionary<string, NodeInfo>
             {
                 ["Applied"] = new NodeInfo("Applied", 0, Colors.CornflowerBlue),
-                ["No Response"] = new NodeInfo("No Response", 2, Colors.Teal),
+                ["No Response"] = new NodeInfo("No Response", 3, Colors.Teal),
                 ["Responded"] = new NodeInfo("Responded", 1, Colors.Olive),
-                ["Interview"] = new NodeInfo("Interview", 1, Colors.MediumPurple),
-                ["Rejected"] = new NodeInfo("Rejected", 2, Colors.Crimson),
-                ["Offer"] = new NodeInfo("Offer", 2, Colors.MediumSeaGreen),
-                ["No Offer"] = new NodeInfo("No Offer", 2, Colors.HotPink)
+                ["Interview"] = new NodeInfo("Interview", 2, Colors.MediumPurple),
+                ["Rejected"] = new NodeInfo("Rejected", 3, Colors.Crimson),
+                ["Offer"] = new NodeInfo("Offer", 3, Colors.MediumSeaGreen),
+                ["No Offer"] = new NodeInfo("No Offer", 3, Colors.HotPink)
             };
 
             // Calculate node sizes based on flow volumes
@@ -83,13 +83,13 @@ namespace Resumetry.WPF.Controls
             }
 
             // Calculate column positions
-            var columnSpacing = width / 4;
-            var columnX = new[] { columnSpacing * 0.5, columnSpacing * 2, columnSpacing * 3.5 };
+            var columnSpacing = width / 5;
+            var columnX = new[] { columnSpacing * 0.5, columnSpacing * 1.5, columnSpacing * 2.5, columnSpacing * 4.5 };
 
             // Arrange nodes vertically within their columns
             var columnNodes = nodes.Values
                 .GroupBy(n => n.Column)
-                .ToDictionary(g => g.Key, g => g.OrderBy(n => n.Name).ToList());
+                .ToDictionary(g => g.Key, g => g.OrderByDescending(n => Math.Max(n.IncomingCount, n.OutgoingCount)).ToList());
 
             var usableHeight = height - 40; // Leave margin
             var heightScale = usableHeight / Math.Max(1, totalApplications);
