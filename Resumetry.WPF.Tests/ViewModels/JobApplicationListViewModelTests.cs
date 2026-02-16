@@ -304,4 +304,19 @@ public class JobApplicationListViewModelTests
                 It.IsAny<Func<IJobApplicationService, Task>>()),
             Times.Never());
     }
+
+    [Fact]
+    public void ReportsCommand_NavigatesToSankeyReportViewModel()
+    {
+        // Arrange
+        var viewModel = new JobApplicationListViewModel(_mockScopedRunner.Object, _mockDialogService.Object, _mockNavigationService.Object);
+
+        // Act
+        viewModel.ReportsCommand.Execute(null);
+
+        // Assert
+        _mockNavigationService.Verify(
+            n => n.NavigateTo<SankeyReportViewModel>(),
+            Times.Once());
+    }
 }

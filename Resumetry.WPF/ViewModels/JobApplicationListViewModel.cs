@@ -138,8 +138,7 @@ namespace Resumetry.ViewModels
         [RelayCommand]
         private void Reports()
         {
-            // TODO: Implement reports functionality
-            dialogService.ShowInfo("Reports functionality coming soon!", "Reports");
+            navigationService.NavigateTo<SankeyReportViewModel>();
         }
 
         [RelayCommand]

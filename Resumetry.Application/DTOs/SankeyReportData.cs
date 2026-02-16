@@ -8,6 +8,6 @@ namespace Resumetry.Application.DTOs
     {
         public int Count { get; internal set; }
 
-        internal void Increment() => Count++;
+        public void Increment() => Count++;
     }
 }

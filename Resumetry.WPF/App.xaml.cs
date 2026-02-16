@@ -54,6 +54,7 @@ namespace Resumetry
             services.AddKeyedScoped<IImportService, LegacyImportService>(ImportType.Legacy);
             services.AddScoped<IExportService, ExportService>();
             services.AddScoped<IJobApplicationService, JobApplicationService>();
+            services.AddScoped<ISankeyReportService, SankeyReportService>();
 
             // Register WPF services
             services.AddSingleton<IDialogService, DialogService>();
@@ -65,6 +66,7 @@ namespace Resumetry
             services.AddTransient<JobApplicationListViewModel>();
             services.AddTransient<ApplicationFormViewModel>();
             services.AddTransient<SettingsViewModel>();
+            services.AddTransient<SankeyReportViewModel>();
 
             // Register Windows
             services.AddTransient<MainWindow>();
@@ -90,6 +92,7 @@ namespace Resumetry
             navigationService.RegisterView<JobApplicationListViewModel, Views.JobApplicationListView>();
             navigationService.RegisterView<ApplicationFormViewModel, Views.ApplicationFormView>();
             navigationService.RegisterView<SettingsViewModel, Views.SettingsView>();
+            navigationService.RegisterView<SankeyReportViewModel, Views.SankeyReportView>();
 
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
