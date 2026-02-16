@@ -68,8 +68,8 @@ namespace Resumetry.WPF.Controls
                 ["Responded"] = new NodeInfo("Responded", 1, Colors.Olive),
                 ["Interview"] = new NodeInfo("Interview", 2, Colors.MediumPurple),
                 ["Rejected"] = new NodeInfo("Rejected", 3, Colors.Crimson),
-                ["Offer"] = new NodeInfo("Offer", 3, Colors.MediumSeaGreen),
-                ["No Offer"] = new NodeInfo("No Offer", 3, Colors.SlateGray)
+                ["No Offer"] = new NodeInfo("No Offer", 3, Colors.SlateGray),
+                ["Offer"] = new NodeInfo("Offer", 3, Colors.MediumSeaGreen)
             };
 
             foreach (var data in ReportData)
@@ -96,7 +96,7 @@ namespace Resumetry.WPF.Controls
             var columnNodes = nodes.Values
                 .Where(n => n.IncomingCount > 0 || n.OutgoingCount > 0)
                 .GroupBy(n => n.Column)
-                .ToDictionary(g => g.Key, g => g.OrderByDescending(n => Math.Max(n.IncomingCount, n.OutgoingCount)).ToList());
+                .ToDictionary(g => g.Key, g => g.ToList());
 
             foreach (var column in columnNodes.Keys)
             {
@@ -109,7 +109,11 @@ namespace Resumetry.WPF.Controls
                     ? Math.Max(NodeSpacing, (usableHeight - totalHeight) / (nodesInColumn.Count - 1))
                     : 0;
 
-                var y = DiagramMargin;
+                // Columns 1 & 2 (Responded, Interview) align to bottom
+                var y = (column == 1 || column == 2)
+                    ? DiagramMargin + usableHeight - totalHeight + NodeSpacing * column
+                    : DiagramMargin;
+
                 foreach (var node in nodesInColumn)
                 {
                     node.X = columnX[node.Column];
