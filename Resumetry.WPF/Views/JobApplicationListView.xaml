@@ -299,7 +299,8 @@
                     <DataTemplate>
                         <Border Margin="0,0,0,12" CornerRadius="4"
                                 BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
-                                Background="White">
+                                Background="White"
+                                MouseLeftButtonDown="RecruiterCard_MouseLeftButtonDown">
                             <Grid>
                                 <!-- Left accent bar -->
                                 <Border Background="{StaticResource LightBlueBrush}"

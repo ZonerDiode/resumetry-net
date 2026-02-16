@@ -37,5 +37,17 @@ namespace Resumetry.Views
                 ViewModel.OpenEditApplicationFormCommand.Execute(null);
             }
         }
+
+        private void RecruiterCard_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2 && sender is FrameworkElement { DataContext: JobApplicationViewModel jobApp })
+            {
+                if (ViewModel != null)
+                {
+                    ViewModel.SelectedJobApplication = jobApp;
+                    ViewModel.OpenEditApplicationFormCommand.Execute(null);
+                }
+            }
+        }
     }
 }

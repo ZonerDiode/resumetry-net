@@ -146,11 +146,13 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
                     Email: entity.Recruiter.Email,
                     Phone: entity.Recruiter.Phone
                 ),
-                ApplicationEvents: [.. entity.ApplicationEvents.Select(e => new ApplicationEventDto(
-                    Occurred: e.Occurred,
-                    Description: e.Description,
-                    Id: e.Id
-                ))]
+                ApplicationEvents: [.. entity.ApplicationEvents
+                    .OrderBy(e => e.Occurred)
+                    .Select(e => new ApplicationEventDto(
+                        Occurred: e.Occurred,
+                        Description: e.Description,
+                        Id: e.Id
+                    ))]
             );
         })];
 
