@@ -283,8 +283,17 @@
 
         <!-- Recruiter View - visible when in recruiter view -->
         <ScrollViewer Grid.Row="1"
-                      VerticalScrollBarVisibility="Auto"
-                      Visibility="{Binding IsListView, Converter={StaticResource BoolToVisibilityConverter}}">
+                      VerticalScrollBarVisibility="Auto">
+            <ScrollViewer.Style>
+                <Style TargetType="ScrollViewer">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsListView}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ScrollViewer.Style>
             <ItemsControl ItemsSource="{Binding FilteredJobApplications}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
