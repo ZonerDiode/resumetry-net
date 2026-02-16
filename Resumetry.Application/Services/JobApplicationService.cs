@@ -10,8 +10,6 @@ namespace Resumetry.Application.Services;
 /// </summary>
 public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationService
 {
-    private readonly IUnitOfWork _unitOfWork = unitOfWork;
-
     /// <inheritdoc />
     public async Task<Guid> CreateAsync(JobApplicationCreateDto dto, CancellationToken cancellationToken = default)
     {
@@ -71,8 +69,8 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         }
 
         // Persist
-        await _unitOfWork.JobApplications.AddAsync(entity, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.JobApplications.AddAsync(entity, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return entity.Id;
     }
@@ -84,7 +82,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         ValidateDto(dto.Company, dto.Position);
 
         // Load existing entity
-        var entity = await _unitOfWork.JobApplications.GetByIdAsync(dto.Id, cancellationToken)
+        var entity = await unitOfWork.JobApplications.GetByIdAsync(dto.Id, cancellationToken)
             ?? throw new KeyNotFoundException($"Job application with ID {dto.Id} not found.");
 
         // Update scalar properties
@@ -107,14 +105,14 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
         SyncApplicationEvents(entity, dto.ApplicationEvents);
 
         // Persist
-        _unitOfWork.JobApplications.Update(entity);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        unitOfWork.JobApplications.Update(entity);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<IEnumerable<JobApplicationSummaryDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var entities = await _unitOfWork.JobApplications.GetAllAsync(cancellationToken);
+        var entities = await unitOfWork.JobApplications.GetAllAsync(cancellationToken);
 
         return entities.Select(entity =>
         {
@@ -149,7 +147,7 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
     /// <inheritdoc />
     public async Task<JobApplicationDetailDto?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken);
+        var entity = await unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken);
         if (entity is null)
         {
             return null;
@@ -188,11 +186,11 @@ public class JobApplicationService(IUnitOfWork unitOfWork) : IJobApplicationServ
     /// <inheritdoc />
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var entity = await _unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken)
+        var entity = await unitOfWork.JobApplications.GetByIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"Job application with ID {id} not found.");
 
-        _unitOfWork.JobApplications.Delete(entity);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        unitOfWork.JobApplications.Delete(entity);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     private static void ValidateDto(string company, string position)
