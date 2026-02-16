@@ -27,6 +27,26 @@ namespace Resumetry.ViewModels
         [ObservableProperty]
         private string _filterText = string.Empty;
 
+        [ObservableProperty]
+        private bool _isListView = true;
+
+        partial void OnIsListViewChanged(bool value)
+        {
+            ApplyFilter();
+        }
+
+        [RelayCommand]
+        private void ToggleRecruiterView()
+        {
+            IsListView = false;
+        }
+
+        [RelayCommand]
+        private void ToggleListView()
+        {
+            IsListView = true;
+        }
+
         private bool CanModifyApplication() => SelectedJobApplication != null;
 
         partial void OnFilterTextChanged(string value)
@@ -63,10 +83,14 @@ namespace Resumetry.ViewModels
         {
             FilteredJobApplications.Clear();
 
-            var filtered = string.IsNullOrWhiteSpace(FilterText)
-                ? _jobApplications
-                : _jobApplications.Where(ja =>
+            var filtered = _jobApplications.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(FilterText))
+                filtered = filtered.Where(ja =>
                     ja.Company.Contains(FilterText, StringComparison.OrdinalIgnoreCase));
+
+            if (!IsListView)
+                filtered = filtered.Where(ja => ja.Recruiter != null);
 
             foreach (var item in filtered)
             {
