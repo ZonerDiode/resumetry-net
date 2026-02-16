@@ -32,7 +32,7 @@ public class ImportServiceTests
             .ReturnsAsync(false);
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.ImportFromJsonAsync(filePath))
+        await FluentActions.Invoking(() => _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<FileNotFoundException>()
             .WithMessage($"File not found: {filePath}");
     }
@@ -66,7 +66,7 @@ public class ImportServiceTests
             .ReturnsAsync(json);
 
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath);
+        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().HaveCount(1);
@@ -121,7 +121,7 @@ public class ImportServiceTests
             .ReturnsAsync(json);
 
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath);
+        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().HaveCount(3);
@@ -143,7 +143,7 @@ public class ImportServiceTests
             .ReturnsAsync(json);
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.ImportFromJsonAsync(filePath))
+        await FluentActions.Invoking(() => _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<InvalidOperationException>()
             .WithMessage("Failed to deserialize JSON content");
     }
@@ -161,7 +161,7 @@ public class ImportServiceTests
             .ReturnsAsync(json);
 
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath);
+        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().BeEmpty();

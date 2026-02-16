@@ -40,7 +40,7 @@ public class ApplicationDbContextTests : IDisposable
 
         // Act
         _context.JobApplications.Add(jobApplication);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -59,14 +59,14 @@ public class ApplicationDbContextTests : IDisposable
         };
 
         _context.JobApplications.Add(jobApplication);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalCreatedAt = jobApplication.CreatedAt;
 
         // Act
-        await Task.Delay(10); // Small delay to ensure different timestamp
+        await Task.Delay(10, TestContext.Current.CancellationToken); // Small delay to ensure different timestamp
         jobApplication.Company = "Updated Company";
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.UpdatedAt.Should().NotBeNull();
@@ -86,14 +86,14 @@ public class ApplicationDbContextTests : IDisposable
         };
 
         _context.JobApplications.Add(jobApplication);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalCreatedAt = jobApplication.CreatedAt;
 
         // Act
-        await Task.Delay(10);
+        await Task.Delay(10, TestContext.Current.CancellationToken);
         jobApplication.Position = "Updated Position";
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.CreatedAt.Should().Be(originalCreatedAt);
@@ -153,7 +153,7 @@ public class ApplicationDbContextTests : IDisposable
         var originalCreatedAt = jobApplication.CreatedAt;
 
         // Act
-        await Task.Delay(10);
+        await Task.Delay(10, TestContext.Current.CancellationToken);
         jobApplication.Company = "Updated Company";
         _context.SaveChanges();
 

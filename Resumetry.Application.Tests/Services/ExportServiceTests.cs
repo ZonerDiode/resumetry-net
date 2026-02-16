@@ -39,7 +39,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         _mockFileService.Verify(x => x.WriteAllTextAsync(
@@ -84,7 +84,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -133,7 +133,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -180,7 +180,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -229,7 +229,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -273,7 +273,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -311,7 +311,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -359,7 +359,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath);
+        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();

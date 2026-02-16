@@ -38,7 +38,7 @@ public class JobApplicationServiceTests
             Position: "Software Engineer");
 
         // Act
-        await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         _mockRepository.Verify(
@@ -69,7 +69,7 @@ public class JobApplicationServiceTests
             .Callback<JobApplication, CancellationToken>((entity, _) => capturedEntity = entity);
 
         // Act
-        await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         capturedEntity.Should().NotBeNull();
@@ -100,7 +100,7 @@ public class JobApplicationServiceTests
             .Callback<JobApplication, CancellationToken>((entity, _) => capturedEntity = entity);
 
         // Act
-        await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         capturedEntity.Should().NotBeNull();
@@ -129,7 +129,7 @@ public class JobApplicationServiceTests
             .Callback<JobApplication, CancellationToken>((entity, _) => capturedEntity = entity);
 
         // Act
-        await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         capturedEntity.Should().NotBeNull();
@@ -147,7 +147,7 @@ public class JobApplicationServiceTests
             Position: "Software Engineer");
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.CreateAsync(dto))
+        await FluentActions.Invoking(() => _sut.CreateAsync(dto, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage("*Company*");
     }
@@ -161,7 +161,7 @@ public class JobApplicationServiceTests
             Position: "");
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.CreateAsync(dto))
+        await FluentActions.Invoking(() => _sut.CreateAsync(dto, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage("*Position*");
     }
@@ -179,7 +179,7 @@ public class JobApplicationServiceTests
             .Callback<JobApplication, CancellationToken>((entity, _) => capturedEntity = entity);
 
         // Act
-        await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         capturedEntity.Should().NotBeNull();
@@ -223,7 +223,7 @@ public class JobApplicationServiceTests
             LoginNotes: "New notes");
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.Company.Should().Be("NewCorp");
@@ -267,7 +267,7 @@ public class JobApplicationServiceTests
             Recruiter: recruiterDto);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.Recruiter.Should().NotBeNull();
@@ -313,7 +313,7 @@ public class JobApplicationServiceTests
             Recruiter: recruiterDto);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.Recruiter.Should().NotBeNull();
@@ -350,7 +350,7 @@ public class JobApplicationServiceTests
             Recruiter: null);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.Recruiter.Should().BeNull();
@@ -383,7 +383,7 @@ public class JobApplicationServiceTests
             ApplicationStatuses: applicationStatuses);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationStatuses.Should().HaveCount(1);
@@ -428,7 +428,7 @@ public class JobApplicationServiceTests
             ApplicationStatuses: applicationStatuses);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationStatuses.Should().HaveCount(1);
@@ -473,7 +473,7 @@ public class JobApplicationServiceTests
             ApplicationStatuses: applicationStatuses);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationStatuses.Should().HaveCount(1);
@@ -507,7 +507,7 @@ public class JobApplicationServiceTests
             ApplicationEvents: events);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationEvents.Should().HaveCount(1);
@@ -552,7 +552,7 @@ public class JobApplicationServiceTests
             ApplicationEvents: events);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationEvents.Should().HaveCount(1);
@@ -597,7 +597,7 @@ public class JobApplicationServiceTests
             ApplicationEvents: events);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationEvents.Should().HaveCount(1);
@@ -618,7 +618,7 @@ public class JobApplicationServiceTests
             Position: "Engineer");
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.UpdateAsync(dto))
+        await FluentActions.Invoking(() => _sut.UpdateAsync(dto, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<KeyNotFoundException>();
     }
 
@@ -633,7 +633,7 @@ public class JobApplicationServiceTests
             Position: "Engineer");
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.UpdateAsync(dto))
+        await FluentActions.Invoking(() => _sut.UpdateAsync(dto, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<ArgumentException>()
             .WithMessage("*Company*");
     }
@@ -665,7 +665,7 @@ public class JobApplicationServiceTests
             ApplicationStatuses: null);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationStatuses.Should().BeEmpty();
@@ -698,7 +698,7 @@ public class JobApplicationServiceTests
             ApplicationEvents: null);
 
         // Act
-        await _sut.UpdateAsync(dto);
+        await _sut.UpdateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         existingEntity.ApplicationEvents.Should().BeEmpty();
@@ -736,7 +736,7 @@ public class JobApplicationServiceTests
             .Callback<JobApplication, CancellationToken>((entity, _) => capturedEntity = entity);
 
         // Act
-        await _sut.CreateAsync(dto);
+        await _sut.CreateAsync(dto, TestContext.Current.CancellationToken);
 
         // Assert
         capturedEntity.Should().NotBeNull();
@@ -765,7 +765,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync([]);
 
         // Act
-        var result = await _sut.GetAllJobSummaryAsync();
+        var result = await _sut.GetAllJobSummaryAsync(TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().BeEmpty();
@@ -792,7 +792,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(applications);
 
         // Act
-        var result = await _sut.GetAllJobSummaryAsync();
+        var result = await _sut.GetAllJobSummaryAsync(TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().HaveCount(1);
@@ -828,7 +828,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(applications);
 
         // Act
-        var result = await _sut.GetAllJobSummaryAsync();
+        var result = await _sut.GetAllJobSummaryAsync(TestContext.Current.CancellationToken);
 
         // Assert
         var dto = result.First();
@@ -861,7 +861,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(applications);
 
         // Act
-        var result = await _sut.GetAllJobSummaryAsync();
+        var result = await _sut.GetAllJobSummaryAsync(TestContext.Current.CancellationToken);
 
         // Assert
         var dto = result.First();
@@ -898,7 +898,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(application);
 
         // Act
-        var result = await _sut.GetByIdAsync(id);
+        var result = await _sut.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().NotBeNull();
@@ -923,7 +923,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync((JobApplication?)null);
 
         // Act
-        var result = await _sut.GetByIdAsync(id);
+        var result = await _sut.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().BeNull();
@@ -952,7 +952,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(application);
 
         // Act
-        var result = await _sut.GetByIdAsync(id);
+        var result = await _sut.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().NotBeNull();
@@ -989,7 +989,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(application);
 
         // Act
-        var result = await _sut.GetByIdAsync(id);
+        var result = await _sut.GetByIdAsync(id, TestContext.Current.CancellationToken);
 
         // Assert
         result.Should().NotBeNull();
@@ -1021,7 +1021,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync(application);
 
         // Act
-        await _sut.DeleteAsync(id);
+        await _sut.DeleteAsync(id, TestContext.Current.CancellationToken);
 
         // Assert
         _mockRepository.Verify(x => x.Delete(application), Times.Once);
@@ -1037,7 +1037,7 @@ public class JobApplicationServiceTests
             .ReturnsAsync((JobApplication?)null);
 
         // Act & Assert
-        await FluentActions.Invoking(() => _sut.DeleteAsync(id))
+        await FluentActions.Invoking(() => _sut.DeleteAsync(id, TestContext.Current.CancellationToken))
             .Should().ThrowAsync<KeyNotFoundException>();
     }
 
