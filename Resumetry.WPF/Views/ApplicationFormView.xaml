@@ -24,7 +24,7 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <!-- Title and Action Buttons -->
@@ -51,7 +51,7 @@
 
                 <!-- Basic Information Section -->
                 <Border Grid.Row="1" Background="{StaticResource LightBlueBrush}"
-                        Padding="24" Margin="0,0,0,12" CornerRadius="4">
+                        Padding="12" Margin="0,0,0,12" CornerRadius="4">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -269,11 +269,10 @@
                                             <Grid>
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="Auto"/>
-                                                    <RowDefinition Height="Auto"/>
                                                 </Grid.RowDefinitions>
 
                                                 <!-- Date and Remove Button Row -->
-                                                <Grid Grid.Row="0" Margin="0,0,0,6">
+                                                <Grid Grid.Row="0" Margin="0">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="110"/>
                                                         <ColumnDefinition Width="*"/>
@@ -285,7 +284,20 @@
                                                                 SelectedDate="{Binding Occurred}"
                                                                 Style="{StaticResource ModernDatePickerStyle}"
                                                                 Height="36"
-                                                                VerticalAlignment="Center"/>
+                                                                VerticalAlignment="Top"/>
+
+                                                    <!-- Description Field (no label) -->
+                                                    <TextBox Grid.Column="1"
+                                                             Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                             TextWrapping="Wrap"
+                                                             AcceptsReturn="True"
+                                                             MinHeight="36"
+                                                             VerticalAlignment="Stretch"
+                                                             Padding="2"
+                                                             Margin="8 0 8 0"
+                                                             VerticalScrollBarVisibility="Auto"
+                                                             Style="{StaticResource ModernTextBoxStyle}"
+                                                             helpers:WatermarkHelper.Watermark="What happened..."/>
 
                                                     <!-- Remove button -->
                                                     <Button Grid.Column="2"
@@ -298,19 +310,9 @@
                                                             FontSize="18"
                                                             FontWeight="Bold"
                                                             Padding="0"
-                                                            VerticalAlignment="Center"
+                                                            VerticalAlignment="Top"
                                                             ToolTip="Remove note"/>
                                                 </Grid>
-
-                                                <!-- Description Field (no label) -->
-                                                <TextBox Grid.Row="1"
-                                                         Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
-                                                         TextWrapping="Wrap"
-                                                         AcceptsReturn="True"
-                                                         Height="50"
-                                                         VerticalScrollBarVisibility="Auto"
-                                                         Style="{StaticResource ModernTextBoxStyle}"
-                                                         helpers:WatermarkHelper.Watermark="What happened..."/>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
@@ -322,24 +324,25 @@
 
                 <!-- Additional Information Section -->
                 <Border Grid.Row="3" Background="{StaticResource LightBlueBrush}"
-                        Padding="24" Margin="0,0,0,16" CornerRadius="4">
+                        Padding="12" Margin="0,0,0,16" CornerRadius="4">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
                         <!-- Section Header -->
                         <TextBlock Grid.Row="0"
                                    Text="Additional Information"
                                    Style="{StaticResource SectionHeaderStyle}"
-                                   Margin="0,0,0,12"/>
+                                   Margin="0,0,0,8"/>
 
                         <!-- URL Fields Side by Side -->
                         <Grid Grid.Row="1" Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="12"/>
                                 <ColumnDefinition Width="*"/>
@@ -362,30 +365,30 @@
                                          helpers:WatermarkHelper.Watermark="https://..."
                                          Height="36"/>
                             </StackPanel>
+                            
+                            <!-- Login Hint -->
+                            <StackPanel Grid.Column="4" Margin="0,0,0,4">
+                                <TextBlock Text="Login Hint" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding LoginHints, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource ModernTextBoxStyle}"
+                                        helpers:WatermarkHelper.Watermark="Portal access notes..."
+                                        Height="36"/>
+                            </StackPanel>
                         </Grid>
 
-                        <!-- Login Hints -->
-                        <StackPanel Grid.Row="2" Margin="0,0,0,4">
-                            <TextBlock Text="Login Hints" Style="{StaticResource FormLabelStyle}"/>
-                            <TextBox Text="{Binding LoginHints, UpdateSourceTrigger=PropertyChanged}"
-                                     TextWrapping="Wrap"
-                                     AcceptsReturn="True"
-                                     Height="32"
-                                     VerticalScrollBarVisibility="Auto"
-                                     Style="{StaticResource ModernTextBoxStyle}"
-                                     helpers:WatermarkHelper.Watermark="Portal access notes..."/>
-                        </StackPanel>
-
                         <!-- Description (Maximized Height) -->
-                        <StackPanel Grid.Row="3">
-                            <TextBlock Text="Description" Style="{StaticResource FormLabelStyle}"/>
-                            <Border Height="450" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
-                                <Grid>
+                        <Grid Grid.Row="2">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Text="Description" Style="{StaticResource FormLabelStyle}"/>
+                            <Border Grid.Row="1" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
                                     <wv2:WebView2 x:Name="DescriptionWebView"
                                                   CoreWebView2InitializationCompleted="DescriptionWebView_CoreWebView2InitializationCompleted"/>
-                                </Grid>
                             </Border>
-                        </StackPanel>
+                        </Grid>
                     </Grid>
                 </Border>
             </Grid>

@@ -64,6 +64,9 @@ namespace Resumetry.ViewModels
         private string _recruiterCompany = string.Empty;
 
         [ObservableProperty]
+        private string _recruiterPhone = string.Empty;
+
+        [ObservableProperty]
         private DateTime _createdAt = DateTime.Now;
 
         [ObservableProperty]
@@ -136,6 +139,7 @@ namespace Resumetry.ViewModels
             {
                 RecruiterName = detailDto.Recruiter.Name;
                 RecruiterCompany = detailDto.Recruiter.Company ?? string.Empty;
+                RecruiterPhone = detailDto.Recruiter.Phone ?? string.Empty;
             }
 
             // Load status items with their IDs
@@ -199,7 +203,8 @@ namespace Resumetry.ViewModels
                 {
                     recruiterDto = new RecruiterDto(
                         Name: RecruiterName,
-                        Company: string.IsNullOrWhiteSpace(RecruiterCompany) ? null : RecruiterCompany);
+                        Company: string.IsNullOrWhiteSpace(RecruiterCompany) ? null : RecruiterCompany,
+                        Phone: string.IsNullOrWhiteSpace(RecruiterPhone) ? null : RecruiterPhone);
                 }
 
                 // Build status items DTOs
