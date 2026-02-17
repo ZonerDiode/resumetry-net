@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -280,6 +281,21 @@ namespace Resumetry.ViewModels
         private void Cancel()
         {
             navigationService.NavigateToHome();
+        }
+
+        [RelayCommand]
+        private void OpenUrl(string? url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return;
+
+            try
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                dialogService.ShowError($"Could not open URL: {ex.Message}", "Error");
+            }
         }
     }
 }

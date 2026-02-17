@@ -215,7 +215,7 @@
                                                         Command="{Binding DataContext.RemoveStatusCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                         CommandParameter="{Binding}"
                                                         Width="36"
-                                                        Height="36"
+                                                        Height="28"
                                                         FontSize="18"
                                                         FontWeight="Bold"
                                                         Padding="0"
@@ -306,11 +306,12 @@
                                                             Command="{Binding DataContext.RemoveNoteCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                             CommandParameter="{Binding}"
                                                             Width="36"
-                                                            Height="36"
+                                                            Height="28"
                                                             FontSize="18"
                                                             FontWeight="Bold"
                                                             Padding="0"
                                                             VerticalAlignment="Top"
+                                                            Margin="0 4 0 0"
                                                             ToolTip="Remove note"/>
                                                 </Grid>
                                             </Grid>
@@ -351,19 +352,58 @@
                             <!-- Source Page URL -->
                             <StackPanel Grid.Column="0">
                                 <TextBlock Text="Source Page URL" Style="{StaticResource FormLabelStyle}"/>
-                                <TextBox Text="{Binding SourcePageUrl, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource ModernTextBoxStyle}"
-                                         helpers:WatermarkHelper.Watermark="https://..."
-                                         Height="36"/>
+                                <Grid Height="36">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="40" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding SourcePageUrl, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBoxStyle}"
+                                             helpers:WatermarkHelper.Watermark="https://..."
+                                             VerticalContentAlignment="Center"
+                                             Margin="0 0 6 0"/>
+
+                                    <!-- icon button -->
+                                    <Button Grid.Column="1"
+                                            Command="{Binding OpenUrlCommand}"
+                                            CommandParameter="{Binding SourcePageUrl}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Height="28"
+                                            Padding="0"
+                                            ToolTip="Open in browser"
+                                            Content="^"/>
+                                </Grid>
+
+
                             </StackPanel>
 
                             <!-- Review Page URL -->
                             <StackPanel Grid.Column="2">
                                 <TextBlock Text="Review Page URL" Style="{StaticResource FormLabelStyle}"/>
-                                <TextBox Text="{Binding ReviewPageUrl, UpdateSourceTrigger=PropertyChanged}"
-                                         Style="{StaticResource ModernTextBoxStyle}"
-                                         helpers:WatermarkHelper.Watermark="https://..."
-                                         Height="36"/>
+                                <Grid Height="36">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="40" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox Grid.Column="0"
+                                             Text="{Binding ReviewPageUrl, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBoxStyle}"
+                                             helpers:WatermarkHelper.Watermark="https://..."
+                                             VerticalContentAlignment="Center"
+                                             Margin="0 0 6 0"/>
+
+                                    <Button Grid.Column="1"
+                                            Command="{Binding OpenUrlCommand}"
+                                            CommandParameter="{Binding ReviewPageUrl}"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Height="28"
+                                            Padding="0"
+                                            ToolTip="Open in browser"
+                                            Content="^"/>
+                                </Grid>
                             </StackPanel>
                             
                             <!-- Login Hint -->
