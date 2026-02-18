@@ -91,7 +91,7 @@ namespace Resumetry.ViewModels
         [RelayCommand]
         private void AddStatus()
         {
-            ApplicationStatuses.Add(new ApplicationStatusViewModel { Occurred = DateTime.Now });
+            ApplicationStatuses.Insert(0, new ApplicationStatusViewModel { Occurred = DateTime.Now });
             OnPropertyChanged(nameof(StatusCount));
         }
 
@@ -108,7 +108,7 @@ namespace Resumetry.ViewModels
         [RelayCommand]
         private void AddNote()
         {
-            ApplicationEvents.Add(new ApplicationEventViewModel { Occurred = DateTime.Now });
+            ApplicationEvents.Insert(0, new ApplicationEventViewModel { Occurred = DateTime.Now });
             OnPropertyChanged(nameof(NotesCount));
         }
 
@@ -145,7 +145,7 @@ namespace Resumetry.ViewModels
 
             // Load status items with their IDs
             ApplicationStatuses.Clear();
-            foreach (var statusItemDto in detailDto.ApplicationStatuses.OrderBy(s => s.Occurred))
+            foreach (var statusItemDto in detailDto.ApplicationStatuses.OrderByDescending(s => s.Occurred))
             {
                 ApplicationStatuses.Add(new ApplicationStatusViewModel
                 {
@@ -163,7 +163,7 @@ namespace Resumetry.ViewModels
 
             // Load application events with their IDs
             ApplicationEvents.Clear();
-            foreach (var eventDto in detailDto.ApplicationEvents.OrderBy(e => e.Occurred))
+            foreach (var eventDto in detailDto.ApplicationEvents.OrderByDescending(e => e.Occurred))
             {
                 ApplicationEvents.Add(new ApplicationEventViewModel
                 {
