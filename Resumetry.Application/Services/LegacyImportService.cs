@@ -1,6 +1,7 @@
 using Resumetry.Application.Interfaces;
 using Resumetry.Domain.Entities;
 using Resumetry.Domain.Enums;
+using Resumetry.Domain.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,9 +13,9 @@ namespace Resumetry.Application.Services
     /// use or to support future versions of the legacy format.
     /// </summary>
     /// <param name="fileService"></param>
-    public class LegacyImportService(IFileService fileService) : IImportService
+    public class LegacyImportService(IFileService fileService, IUnitOfWork unitOfWork) : IImportService
     {
-        public async Task<IEnumerable<JobApplication>> ImportFromJsonAsync(string filePath, CancellationToken cancellationToken = default)
+        public async Task<int> ImportFromJsonAsync(string filePath, CancellationToken cancellationToken = default)
         {
             if (!await fileService.FileExistsAsync(filePath))
             {
@@ -25,7 +26,14 @@ namespace Resumetry.Application.Services
             var dtos = JsonSerializer.Deserialize<List<JobApplicationDto>>(jsonContent)
                 ?? throw new InvalidOperationException("Failed to deserialize JSON content");
 
-            return [.. dtos.Select(MapDtoToEntity)];
+            foreach (var jobApplication in dtos.Select(MapDtoToEntity))
+            {
+                await unitOfWork.JobApplications.AddAsync(jobApplication, cancellationToken);
+            }
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+
+            return dtos.Count;
         }
 
         private JobApplication MapDtoToEntity(JobApplicationDto dto)
@@ -48,21 +56,21 @@ namespace Resumetry.Application.Services
             // Map Recruiter if name is provided
             if (!string.IsNullOrWhiteSpace(dto.RecruiterName))
             {
-                jobApplication.Recruiter = new Recruiter
+                jobApplication.Recruiter = new()
                 {
                     Name = dto.RecruiterName,
                     Company = string.IsNullOrWhiteSpace(dto.RecruiterCompany) ? null : dto.RecruiterCompany
                 };
             }
 
-            // Map Status Items
+            // Map Application Statuses
             if (dto.Status != null)
             {
                 foreach (var statusDto in dto.Status)
                 {
                     if (Enum.TryParse<StatusEnum>(statusDto.Status, true, out var statusEnum))
                     {
-                        jobApplication.ApplicationStatuses.Add(new ApplicationStatus
+                        jobApplication.ApplicationStatuses.Add(new()
                         {
                             Occurred = statusDto.OccurDate,
                             Status = statusEnum
@@ -78,7 +86,7 @@ namespace Resumetry.Application.Services
                 {
                     if (!string.IsNullOrWhiteSpace(noteDto.Description))
                     {
-                        jobApplication.ApplicationEvents.Add(new ApplicationEvent
+                        jobApplication.ApplicationEvents.Add(new()
                         {
                             Occurred = noteDto.OccurDate,
                             Description = noteDto.Description
@@ -90,7 +98,7 @@ namespace Resumetry.Application.Services
             return jobApplication;
         }
 
-        // DTO classes for JSON deserialization
+        // DTO classes for Legacy JSON field names
         private class JobApplicationDto
         {
             [JsonPropertyName("id")]

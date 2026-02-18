@@ -5,8 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using Resumetry.Application.Enums;
 using Resumetry.Application.Interfaces;
-using Resumetry.Domain.Entities;
-using Resumetry.Domain.Interfaces;
 using Resumetry.WPF.Messages;
 using Resumetry.WPF.Services;
 
@@ -16,7 +14,6 @@ namespace Resumetry.ViewModels
         [FromKeyedServices(ImportType.Standard)] IImportService importService,
         [FromKeyedServices(ImportType.Legacy)] IImportService legacyImportService,
         IExportService exportService,
-        IUnitOfWork unitOfWork,
         INavigationService navigationService,
         IDialogService dialogService) : ViewModelBase
     {
@@ -25,15 +22,13 @@ namespace Resumetry.ViewModels
         private string _statusMessage = string.Empty;
 
         [RelayCommand]
-        private async Task ImportFromJsonAsync() =>
-            await ImportCoreAsync(importService.ImportFromJsonAsync);
+        private async Task ImportFromJsonAsync() => await ImportCoreAsync(importService.ImportFromJsonAsync);
 
         [RelayCommand]
-        private async Task ImportFromLegacyJsonAsync() =>
-            await ImportCoreAsync(legacyImportService.ImportFromJsonAsync);
-
+        private async Task ImportFromLegacyJsonAsync() => await ImportCoreAsync(legacyImportService.ImportFromJsonAsync);
+        
         private async Task ImportCoreAsync(
-            Func<string, CancellationToken, Task<IEnumerable<JobApplication>>> importFunc)
+            Func<string, CancellationToken, Task<int>> importFunc)
         {
             var openFileDialog = new OpenFileDialog
             {
@@ -50,17 +45,7 @@ namespace Resumetry.ViewModels
             {
                 StatusMessage = "Importing...";
 
-                var jobApplications = await importFunc(openFileDialog.FileName, CancellationToken.None);
-                var jobApplicationsList = jobApplications.ToList();
-
-                int importedCount = 0;
-                foreach (var jobApplication in jobApplicationsList)
-                {
-                    await unitOfWork.JobApplications.AddAsync(jobApplication);
-                    importedCount++;
-                }
-
-                await unitOfWork.SaveChangesAsync();
+                int importedCount = await importFunc(openFileDialog.FileName, CancellationToken.None);
 
                 StatusMessage = $"Successfully imported {importedCount} application(s)";
 
@@ -93,13 +78,10 @@ namespace Resumetry.ViewModels
             {
                 StatusMessage = "Exporting...";
 
-                var jobApplications = await unitOfWork.JobApplications.GetAllAsync();
-                var jobApplicationsList = jobApplications.ToList();
+                int exportedCount = await exportService.ExportToJsonAsync(saveFileDialog.FileName);
 
-                await exportService.ExportToJsonAsync(jobApplicationsList, saveFileDialog.FileName);
-
-                StatusMessage = $"Successfully exported {jobApplicationsList.Count} application(s) to {saveFileDialog.FileName}";
-                dialogService.ShowInfo($"Successfully exported {jobApplicationsList.Count} application(s)", "Export Success");
+                StatusMessage = $"Successfully exported {exportedCount} application(s) to {saveFileDialog.FileName}";
+                dialogService.ShowInfo($"Successfully exported {exportedCount} application(s)", "Export Success");
             }
             catch (Exception ex)
             {

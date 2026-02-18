@@ -4,6 +4,7 @@ using Resumetry.Application.Interfaces;
 using Resumetry.Application.Services;
 using Resumetry.Domain.Entities;
 using Resumetry.Domain.Enums;
+using Resumetry.Domain.Interfaces;
 using Xunit;
 
 namespace Resumetry.Application.Tests.Services;
@@ -14,15 +15,18 @@ namespace Resumetry.Application.Tests.Services;
 public class LegacyImportServiceTests
 {
     private readonly Mock<IFileService> _mockFileService;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly Mock<IJobApplicationRepository> _mockRepo;
     private readonly LegacyImportService _sut;
 
     public LegacyImportServiceTests()
     {
         _mockFileService = new Mock<IFileService>();
-        _sut = new LegacyImportService(_mockFileService.Object);
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
+        _mockRepo = new Mock<IJobApplicationRepository>();
+        _mockUnitOfWork.Setup(x => x.JobApplications).Returns(_mockRepo.Object);
+        _sut = new LegacyImportService(_mockFileService.Object, _mockUnitOfWork.Object);
     }
-
-    #region ImportFromJsonAsync Tests
 
     [Fact]
     public async Task ImportFromJsonAsync_FileNotFound_ThrowsFileNotFoundException()
@@ -39,7 +43,7 @@ public class LegacyImportServiceTests
     }
 
     [Fact]
-    public async Task ImportFromJsonAsync_ValidJsonSingleApplication_ReturnsCorrectEntity()
+    public async Task ImportFromJsonAsync_ValidJsonSingleApplication_AddsEntityAndReturnsCount()
     {
         // Arrange
         var filePath = "test.json";
@@ -65,23 +69,29 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.Should().HaveCount(1);
-        var application = result.First();
-        application.Id.Should().Be(new Guid("11111111-1111-1111-1111-111111111111"));
-        application.Company.Should().Be("TechCorp");
-        application.Position.Should().Be("Software Engineer");
-        application.Description.Should().Be("Great opportunity");
-        application.Salary.Should().Be("$100k");
-        application.TopJob.Should().BeTrue();
-        application.SourcePage.Should().Be("linkedin.com");
-        application.ReviewPage.Should().Be("glassdoor.com");
-        application.LoginNotes.Should().Be("Use SSO");
-        application.CreatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
-        application.UpdatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.Id.Should().Be(new Guid("11111111-1111-1111-1111-111111111111"));
+        capturedApp.Company.Should().Be("TechCorp");
+        capturedApp.Position.Should().Be("Software Engineer");
+        capturedApp.Description.Should().Be("Great opportunity");
+        capturedApp.Salary.Should().Be("$100k");
+        capturedApp.TopJob.Should().BeTrue();
+        capturedApp.SourcePage.Should().Be("linkedin.com");
+        capturedApp.ReviewPage.Should().Be("glassdoor.com");
+        capturedApp.LoginNotes.Should().Be("Use SSO");
+        capturedApp.CreatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
+        capturedApp.UpdatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -117,14 +127,20 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        var capturedApps = new List<JobApplication>();
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApps.Add(app))
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.Should().HaveCount(3);
-        result.Should().Contain(a => a.Company == "TechCorp");
-        result.Should().Contain(a => a.Company == "DataCo");
-        result.Should().Contain(a => a.Company == "CloudCorp");
+        count.Should().Be(3);
+        capturedApps.Should().Contain(a => a.Company == "TechCorp");
+        capturedApps.Should().Contain(a => a.Company == "DataCo");
+        capturedApps.Should().Contain(a => a.Company == "CloudCorp");
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -150,14 +166,20 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.Recruiter.Should().NotBeNull();
-        application.Recruiter!.Name.Should().Be("John Doe");
-        application.Recruiter.Company.Should().Be("RecruiterCo");
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.Recruiter.Should().NotBeNull();
+        capturedApp.Recruiter!.Name.Should().Be("John Doe");
+        capturedApp.Recruiter.Company.Should().Be("RecruiterCo");
     }
 
     [Fact]
@@ -181,11 +203,17 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.First().Recruiter.Should().BeNull();
+        capturedApp.Should().NotBeNull();
+        capturedApp!.Recruiter.Should().BeNull();
     }
 
     [Fact]
@@ -210,11 +238,17 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.First().Recruiter.Should().BeNull();
+        capturedApp.Should().NotBeNull();
+        capturedApp!.Recruiter.Should().BeNull();
     }
 
     [Fact]
@@ -252,15 +286,21 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.ApplicationStatuses.Should().HaveCount(3);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.ApplicationStatuses.Should().HaveCount(3);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
     }
 
     [Fact]
@@ -298,15 +338,21 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.ApplicationStatuses.Should().HaveCount(2);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
-        application.ApplicationStatuses.Should().NotContain(s => s.Status.ToString() == "InvalidStatus");
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.ApplicationStatuses.Should().HaveCount(2);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
+        capturedApp.ApplicationStatuses.Should().NotContain(s => s.Status.ToString() == "InvalidStatus");
     }
 
     [Fact]
@@ -340,14 +386,20 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.ApplicationEvents.Should().HaveCount(2);
-        application.ApplicationEvents.Should().Contain(e => e.Description == "Submitted application online");
-        application.ApplicationEvents.Should().Contain(e => e.Description == "Received confirmation email");
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.ApplicationEvents.Should().HaveCount(2);
+        capturedApp.ApplicationEvents.Should().Contain(e => e.Description == "Submitted application online");
+        capturedApp.ApplicationEvents.Should().Contain(e => e.Description == "Received confirmation email");
     }
 
     [Fact]
@@ -385,14 +437,20 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.ApplicationEvents.Should().HaveCount(2);
-        application.ApplicationEvents.Should().Contain(e => e.Description == "Valid note");
-        application.ApplicationEvents.Should().Contain(e => e.Description == "Another valid note");
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.ApplicationEvents.Should().HaveCount(2);
+        capturedApp.ApplicationEvents.Should().Contain(e => e.Description == "Valid note");
+        capturedApp.ApplicationEvents.Should().Contain(e => e.Description == "Another valid note");
     }
 
     [Fact]
@@ -414,7 +472,7 @@ public class LegacyImportServiceTests
     }
 
     [Fact]
-    public async Task ImportFromJsonAsync_EmptyArray_ReturnsEmptyCollection()
+    public async Task ImportFromJsonAsync_EmptyArray_ReturnsZero()
     {
         // Arrange
         var filePath = "test.json";
@@ -426,10 +484,11 @@ public class LegacyImportServiceTests
             .ReturnsAsync(json);
 
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.Should().BeEmpty();
+        count.Should().Be(0);
+        _mockRepo.Verify(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -459,17 +518,23 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.Description.Should().Be(string.Empty);
-        application.Salary.Should().Be(string.Empty);
-        application.TopJob.Should().BeFalse();
-        application.SourcePage.Should().BeNull();
-        application.ReviewPage.Should().BeNull();
-        application.LoginNotes.Should().BeNull();
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.Description.Should().Be(string.Empty);
+        capturedApp.Salary.Should().Be(string.Empty);
+        capturedApp.TopJob.Should().BeFalse();
+        capturedApp.SourcePage.Should().BeNull();
+        capturedApp.ReviewPage.Should().BeNull();
+        capturedApp.LoginNotes.Should().BeNull();
     }
 
     [Fact]
@@ -507,17 +572,20 @@ public class LegacyImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        var application = result.First();
-        application.ApplicationStatuses.Should().HaveCount(3);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
-        application.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.ApplicationStatuses.Should().HaveCount(3);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Applied);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Screen);
+        capturedApp.ApplicationStatuses.Should().Contain(s => s.Status == StatusEnum.Interview);
     }
-
-    #endregion
-
 }

@@ -4,6 +4,7 @@ using Resumetry.Application.Interfaces;
 using Resumetry.Application.Services;
 using Resumetry.Domain.Entities;
 using Resumetry.Domain.Enums;
+using Resumetry.Domain.Interfaces;
 using System.Text.Json;
 using Xunit;
 
@@ -15,21 +16,28 @@ namespace Resumetry.Application.Tests.Services;
 public class ExportServiceTests
 {
     private readonly Mock<IFileService> _mockFileService;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly Mock<IJobApplicationRepository> _mockRepo;
     private readonly ExportService _sut;
 
     public ExportServiceTests()
     {
         _mockFileService = new Mock<IFileService>();
-        _sut = new ExportService(_mockFileService.Object);
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
+        _mockRepo = new Mock<IJobApplicationRepository>();
+        _mockUnitOfWork.Setup(x => x.JobApplications).Returns(_mockRepo.Object);
+        _sut = new ExportService(_mockFileService.Object, _mockUnitOfWork.Object);
     }
 
     [Fact]
     public async Task ExportToJsonAsync_EmptyCollection_WritesEmptyJsonArray()
     {
         // Arrange
-        var jobApplications = Enumerable.Empty<JobApplication>();
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -39,7 +47,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
         _mockFileService.Verify(x => x.WriteAllTextAsync(
@@ -48,6 +56,7 @@ public class ExportServiceTests
             It.IsAny<CancellationToken>()),
             Times.Once);
 
+        count.Should().Be(0);
         capturedJson.Should().NotBeNull();
         var deserialized = JsonSerializer.Deserialize<List<object>>(capturedJson!);
         deserialized.Should().BeEmpty();
@@ -72,9 +81,11 @@ public class ExportServiceTests
             UpdatedAt = new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc)
         };
 
-        var jobApplications = new[] { jobApplication };
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([jobApplication]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -84,9 +95,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
+        count.Should().Be(1);
         capturedJson.Should().NotBeNull();
         var document = JsonDocument.Parse(capturedJson!);
         var array = document.RootElement;
@@ -121,9 +133,11 @@ public class ExportServiceTests
             }
         };
 
-        var jobApplications = new[] { jobApplication };
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([jobApplication]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -133,9 +147,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
+        count.Should().Be(1);
         capturedJson.Should().NotBeNull();
         var document = JsonDocument.Parse(capturedJson!);
         var app = document.RootElement[0];
@@ -156,21 +171,23 @@ public class ExportServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        jobApplication.ApplicationStatuses.Add(new ApplicationStatus
+        jobApplication.ApplicationStatuses.Add(new()
         {
             Occurred = new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc),
             Status = StatusEnum.Applied
         });
 
-        jobApplication.ApplicationStatuses.Add(new ApplicationStatus
+        jobApplication.ApplicationStatuses.Add(new()
         {
             Occurred = new DateTime(2024, 1, 20, 10, 0, 0, DateTimeKind.Utc),
             Status = StatusEnum.Screen
         });
 
-        var jobApplications = new[] { jobApplication };
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([jobApplication]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -180,9 +197,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
+        count.Should().Be(1);
         capturedJson.Should().NotBeNull();
         var document = JsonDocument.Parse(capturedJson!);
         var app = document.RootElement[0];
@@ -205,21 +223,23 @@ public class ExportServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        jobApplication.ApplicationEvents.Add(new ApplicationEvent
+        jobApplication.ApplicationEvents.Add(new()
         {
             Occurred = new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc),
             Description = "Submitted application online"
         });
 
-        jobApplication.ApplicationEvents.Add(new ApplicationEvent
+        jobApplication.ApplicationEvents.Add(new()
         {
             Occurred = new DateTime(2024, 1, 16, 10, 0, 0, DateTimeKind.Utc),
             Description = "Received confirmation email"
         });
 
-        var jobApplications = new[] { jobApplication };
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([jobApplication]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -229,9 +249,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
+        count.Should().Be(1);
         capturedJson.Should().NotBeNull();
         var document = JsonDocument.Parse(capturedJson!);
         var app = document.RootElement[0];
@@ -261,9 +282,11 @@ public class ExportServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        var jobApplications = new[] { jobApplication };
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([jobApplication]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -273,9 +296,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
+        count.Should().Be(1);
         capturedJson.Should().NotBeNull();
         var document = JsonDocument.Parse(capturedJson!);
         var app = document.RootElement[0];
@@ -299,9 +323,11 @@ public class ExportServiceTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        var jobApplications = new[] { jobApplication };
         var filePath = "export.json";
         string? capturedJson = null;
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([jobApplication]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -311,7 +337,7 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
         capturedJson.Should().NotBeNull();
@@ -351,6 +377,9 @@ public class ExportServiceTests
         var filePath = "export.json";
         string? capturedJson = null;
 
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync(jobApplications);
+
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
             It.IsAny<string>(),
@@ -359,9 +388,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ExportToJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
+        count.Should().Be(3);
         capturedJson.Should().NotBeNull();
         var document = JsonDocument.Parse(capturedJson!);
         document.RootElement.GetArrayLength().Should().Be(3);
@@ -375,16 +405,11 @@ public class ExportServiceTests
     public async Task ExportToJsonAsync_PassesCancellationToken()
     {
         // Arrange
-        var jobApplications = new[] { new JobApplication
-        {
-            Company = "TechCorp",
-            Position = "Software Engineer",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        }};
-
         var filePath = "export.json";
         var cts = new CancellationTokenSource();
+
+        _mockRepo.Setup(x => x.GetAllAsync(It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
 
         _mockFileService.Setup(x => x.WriteAllTextAsync(
             filePath,
@@ -393,9 +418,10 @@ public class ExportServiceTests
             .Returns(Task.CompletedTask);
 
         // Act
-        await _sut.ExportToJsonAsync(jobApplications, filePath, cts.Token);
+        await _sut.ExportToJsonAsync(filePath, cts.Token);
 
         // Assert
+        _mockRepo.Verify(x => x.GetAllAsync(cts.Token), Times.Once);
         _mockFileService.Verify(x => x.WriteAllTextAsync(
             filePath,
             It.IsAny<string>(),

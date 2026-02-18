@@ -3,6 +3,7 @@ using Moq;
 using Resumetry.Application.Interfaces;
 using Resumetry.Application.Services;
 using Resumetry.Domain.Entities;
+using Resumetry.Domain.Interfaces;
 using Xunit;
 
 namespace Resumetry.Application.Tests.Services;
@@ -13,15 +14,18 @@ namespace Resumetry.Application.Tests.Services;
 public class ImportServiceTests
 {
     private readonly Mock<IFileService> _mockFileService;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly Mock<IJobApplicationRepository> _mockRepo;
     private readonly ImportService _sut;
 
     public ImportServiceTests()
     {
         _mockFileService = new Mock<IFileService>();
-        _sut = new ImportService(_mockFileService.Object);
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
+        _mockRepo = new Mock<IJobApplicationRepository>();
+        _mockUnitOfWork.Setup(x => x.JobApplications).Returns(_mockRepo.Object);
+        _sut = new ImportService(_mockFileService.Object, _mockUnitOfWork.Object);
     }
-
-    #region ImportFromJsonAsync Tests
 
     [Fact]
     public async Task ImportFromJsonAsync_FileNotFound_ThrowsFileNotFoundException()
@@ -38,7 +42,7 @@ public class ImportServiceTests
     }
 
     [Fact]
-    public async Task ImportFromJsonAsync_ValidJsonSingleApplication_ReturnsCorrectEntity()
+    public async Task ImportFromJsonAsync_ValidJsonSingleApplication_AddsEntityAndReturnsCount()
     {
         // Arrange
         var filePath = "test.json";
@@ -65,23 +69,29 @@ public class ImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        JobApplication? capturedApp = null;
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApp = app)
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.Should().HaveCount(1);
-        var application = result.First();
-        application.Id.Should().Be(new Guid("11111111-1111-1111-1111-111111111111"));
-        application.Company.Should().Be("TechCorp");
-        application.Position.Should().Be("Software Engineer");
-        application.Description.Should().Be("Great opportunity");
-        application.Salary.Should().Be("$100k");
-        application.TopJob.Should().BeTrue();
-        application.SourcePage.Should().Be("linkedin.com");
-        application.ReviewPage.Should().Be("glassdoor.com");
-        application.LoginNotes.Should().Be("Use SSO");
-        application.CreatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
-        application.UpdatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
+        count.Should().Be(1);
+        capturedApp.Should().NotBeNull();
+        capturedApp!.Id.Should().Be(new Guid("11111111-1111-1111-1111-111111111111"));
+        capturedApp.Company.Should().Be("TechCorp");
+        capturedApp.Position.Should().Be("Software Engineer");
+        capturedApp.Description.Should().Be("Great opportunity");
+        capturedApp.Salary.Should().Be("$100k");
+        capturedApp.TopJob.Should().BeTrue();
+        capturedApp.SourcePage.Should().Be("linkedin.com");
+        capturedApp.ReviewPage.Should().Be("glassdoor.com");
+        capturedApp.LoginNotes.Should().Be("Use SSO");
+        capturedApp.CreatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
+        capturedApp.UpdatedAt.Should().Be(new DateTime(2024, 1, 15, 10, 0, 0, DateTimeKind.Utc));
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -120,14 +130,20 @@ public class ImportServiceTests
         _mockFileService.Setup(x => x.ReadAllTextAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(json);
 
+        var capturedApps = new List<JobApplication>();
+        _mockRepo.Setup(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()))
+            .Callback<JobApplication, CancellationToken>((app, _) => capturedApps.Add(app))
+            .Returns(Task.CompletedTask);
+
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.Should().HaveCount(3);
-        result.Should().Contain(a => a.Company == "TechCorp");
-        result.Should().Contain(a => a.Company == "DataCo");
-        result.Should().Contain(a => a.Company == "CloudCorp");
+        count.Should().Be(3);
+        capturedApps.Should().Contain(a => a.Company == "TechCorp");
+        capturedApps.Should().Contain(a => a.Company == "DataCo");
+        capturedApps.Should().Contain(a => a.Company == "CloudCorp");
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -149,7 +165,7 @@ public class ImportServiceTests
     }
 
     [Fact]
-    public async Task ImportFromJsonAsync_EmptyArray_ReturnsEmptyCollection()
+    public async Task ImportFromJsonAsync_EmptyArray_ReturnsZero()
     {
         // Arrange
         var filePath = "test.json";
@@ -161,11 +177,11 @@ public class ImportServiceTests
             .ReturnsAsync(json);
 
         // Act
-        var result = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
+        var count = await _sut.ImportFromJsonAsync(filePath, TestContext.Current.CancellationToken);
 
         // Assert
-        result.Should().BeEmpty();
+        count.Should().Be(0);
+        _mockRepo.Verify(x => x.AddAsync(It.IsAny<JobApplication>(), It.IsAny<CancellationToken>()), Times.Never);
+        _mockUnitOfWork.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
-
-    #endregion
 }
