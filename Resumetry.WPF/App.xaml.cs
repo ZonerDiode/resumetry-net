@@ -1,16 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Resumetry.Application.Enums;
-using Resumetry.Application.Interfaces;
-using Resumetry.Application.Services;
-using Resumetry.Domain.Interfaces;
-using Resumetry.Infrastructure.Data;
-using Resumetry.Infrastructure.Data.Repositories;
-using Resumetry.Infrastructure.Services;
 using Resumetry.ViewModels;
 using Resumetry.WPF.Services;
-using System.IO;
+using Resumetry.Infrastructure;
+using Resumetry.Application;
 using System.Windows;
 
 namespace Resumetry
@@ -27,34 +21,15 @@ namespace Resumetry
             _host = Host.CreateDefaultBuilder()
                 .ConfigureServices((context, services) =>
                 {
-                    ConfigureServices(services);
+                    ConfigureServices(services, context.Configuration);
                 })
                 .Build();
         }
 
-        private void ConfigureServices(IServiceCollection services)
+        private void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            // Get database path in AppData
-            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            var appFolder = Path.Combine(appDataPath, "Resumetry");
-            Directory.CreateDirectory(appFolder);
-            var dbPath = Path.Combine(appFolder, "resumetry.db");
-
-            // Register DbContext
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite($"Data Source={dbPath}"));
-
-            // Register repositories and unit of work
-            services.AddScoped<IJobApplicationRepository, JobApplicationRepository>();
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            // Register services
-            services.AddSingleton<IFileService, FileService>();
-            services.AddKeyedScoped<IImportService, ImportService>(ImportType.Standard);
-            services.AddKeyedScoped<IImportService, LegacyImportService>(ImportType.Legacy);
-            services.AddScoped<IExportService, ExportService>();
-            services.AddScoped<IJobApplicationService, JobApplicationService>();
-            services.AddScoped<ISankeyReportService, SankeyReportService>();
+            services.AddInfrastructure();
+            services.AddApplication();
 
             // Register WPF services
             services.AddSingleton<IDialogService, DialogService>();
@@ -76,12 +51,7 @@ namespace Resumetry
         {
             await _host.StartAsync();
 
-            // Ensure database is created
-            using (var scope = _host.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                await dbContext.Database.MigrateAsync();
-            }
+            await _host.Services.InitializeDatabaseAsync();
 
             // Initialize navigation service with shell view model
             var navigationService = (NavigationService)_host.Services.GetRequiredService<INavigationService>();

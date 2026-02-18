@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Resumetry.Application\Resumetry.Application.csproj" />
+    <ProjectReference Include="..\Resumetry.Infrastructure\Resumetry.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

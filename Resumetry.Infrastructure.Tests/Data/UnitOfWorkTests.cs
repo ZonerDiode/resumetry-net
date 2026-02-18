@@ -9,11 +9,12 @@ namespace Resumetry.Infrastructure.Tests.Data;
 /// <summary>
 /// Tests for ApplicationDbContext timestamp management.
 /// </summary>
-public class ApplicationDbContextTests : IDisposable
+public class UnitOfWorkTests : IDisposable
 {
+    private readonly UnitOfWork _unitOfWork;
     private readonly ApplicationDbContext _context;
 
-    public ApplicationDbContextTests()
+    public UnitOfWorkTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlite("DataSource=:memory:")
@@ -22,6 +23,8 @@ public class ApplicationDbContextTests : IDisposable
         _context = new ApplicationDbContext(options);
         _context.Database.OpenConnection();
         _context.Database.EnsureCreated();
+
+        _unitOfWork = new UnitOfWork(_context);
     }
 
     [Fact]
@@ -39,8 +42,8 @@ public class ApplicationDbContextTests : IDisposable
         jobApplication.CreatedAt.Should().Be(default(DateTime));
 
         // Act
-        _context.JobApplications.Add(jobApplication);
-        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _unitOfWork.JobApplications.AddAsync(jobApplication, TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -58,15 +61,15 @@ public class ApplicationDbContextTests : IDisposable
             Position = "Test Position"
         };
 
-        _context.JobApplications.Add(jobApplication);
-        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _unitOfWork.JobApplications.AddAsync(jobApplication, TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalCreatedAt = jobApplication.CreatedAt;
 
         // Act
         await Task.Delay(10, TestContext.Current.CancellationToken); // Small delay to ensure different timestamp
         jobApplication.Company = "Updated Company";
-        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.UpdatedAt.Should().NotBeNull();
@@ -85,15 +88,15 @@ public class ApplicationDbContextTests : IDisposable
             Position = "Test Position"
         };
 
-        _context.JobApplications.Add(jobApplication);
-        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _unitOfWork.JobApplications.AddAsync(jobApplication, TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var originalCreatedAt = jobApplication.CreatedAt;
 
         // Act
         await Task.Delay(10, TestContext.Current.CancellationToken);
         jobApplication.Position = "Updated Position";
-        await _context.SaveChangesAsync(TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.CreatedAt.Should().Be(originalCreatedAt);
@@ -113,7 +116,7 @@ public class ApplicationDbContextTests : IDisposable
         };
 
         // Assert
-        jobApplication.CreatedAt.Should().Be(default(DateTime));
+        jobApplication.CreatedAt.Should().Be(default);
     }
 
     [Fact]
@@ -128,8 +131,8 @@ public class ApplicationDbContextTests : IDisposable
         };
 
         // Act
-        _context.JobApplications.Add(jobApplication);
-        _context.SaveChanges();
+        await _unitOfWork.JobApplications.AddAsync(jobApplication, TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
@@ -147,15 +150,14 @@ public class ApplicationDbContextTests : IDisposable
             Position = "Test Position"
         };
 
-        _context.JobApplications.Add(jobApplication);
-        _context.SaveChanges();
-
+        await _unitOfWork.JobApplications.AddAsync(jobApplication, TestContext.Current.CancellationToken);
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
         var originalCreatedAt = jobApplication.CreatedAt;
 
         // Act
         await Task.Delay(10, TestContext.Current.CancellationToken);
         jobApplication.Company = "Updated Company";
-        _context.SaveChanges();
+        await _unitOfWork.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Assert
         jobApplication.UpdatedAt.Should().NotBeNull();
