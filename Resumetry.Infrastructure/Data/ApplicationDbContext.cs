@@ -4,7 +4,7 @@ using Resumetry.Domain.Entities;
 
 namespace Resumetry.Infrastructure.Data
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    internal class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
         public DbSet<JobApplication> JobApplications => Set<JobApplication>();
         public DbSet<Recruiter> Recruiters => Set<Recruiter>();

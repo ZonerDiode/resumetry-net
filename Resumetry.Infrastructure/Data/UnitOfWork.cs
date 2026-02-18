@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Resumetry.Domain.Common;
 using Resumetry.Domain.Interfaces;
 using Resumetry.Infrastructure.Data.Repositories;
@@ -12,7 +11,7 @@ namespace Resumetry.Infrastructure.Data
     /// container with appropriate lifetime management.
     /// </summary>
     /// <param name="context">The database context used for data operations.</param>
-    public class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
+    internal class UnitOfWork(ApplicationDbContext context) : IUnitOfWork
     {
         public IJobApplicationRepository JobApplications { get; } = new JobApplicationRepository(context);
 

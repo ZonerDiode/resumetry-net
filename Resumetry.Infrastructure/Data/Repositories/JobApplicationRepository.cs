@@ -4,7 +4,7 @@ using Resumetry.Domain.Interfaces;
 
 namespace Resumetry.Infrastructure.Data.Repositories
 {
-    public class JobApplicationRepository(ApplicationDbContext context) : IJobApplicationRepository
+    internal class JobApplicationRepository(ApplicationDbContext context) : IJobApplicationRepository
     {
         public async Task<JobApplication?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
