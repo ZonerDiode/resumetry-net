@@ -22,9 +22,9 @@ public class ExportService(IFileService fileService, IUnitOfWork unitOfWork) : I
     /// <summary>
     /// Exports job applications to JSON format.
     /// </summary>
-    /// <param name="jobApplications">The collection of job applications to export.</param>
     /// <param name="filePath">The file path where the JSON will be written.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The number of job applications exported.</returns>
     public async Task<int> ExportToJsonAsync(string filePath, CancellationToken cancellationToken = default)
     {
         var jobApplications = await unitOfWork.JobApplications.GetAllAsync(cancellationToken);
