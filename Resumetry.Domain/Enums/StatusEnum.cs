@@ -3,11 +3,11 @@
     /*
      * Expected flow of a job application:
      * 
-     * Applied -> Rejected
-     * Applied -> Screen -> Interview 
-     *      Interview -> Offer
-     *      Interview -> NoOffer
-     *      Interview -> Withdrawn
+     * Applied -> Rejected, Screen
+     * 
+     * Screen -> Interview 
+     * 
+     * Interview -> Offer, NoOffer, Withdrawn
      */
     public enum StatusEnum
     {
