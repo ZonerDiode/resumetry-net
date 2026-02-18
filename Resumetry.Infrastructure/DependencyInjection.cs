@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Resumetry.Application.Enums;
 using Resumetry.Application.Interfaces;
-using Resumetry.Application.Services;
 using Resumetry.Domain.Interfaces;
 using Resumetry.Infrastructure.Data;
 using Resumetry.Infrastructure.Data.Repositories;
