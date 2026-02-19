@@ -24,10 +24,10 @@ namespace Resumetry.Views
             // Initialize WebView2
             await DescriptionWebView.EnsureCoreWebView2Async(null);
 
-            // Add initial status item only for new applications
+            // Add initial Applied status for new applications without showing the dialog
             if (ViewModel != null && ViewModel.ApplicationStatuses.Count == 0)
             {
-                ViewModel.AddStatusCommand.Execute(null);
+                ViewModel.EnsureAppliedStatus();
             }
         }
 

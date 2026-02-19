@@ -1,7 +1,4 @@
 ﻿using Resumetry.Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Resumetry.Application.Services
 {
@@ -11,33 +8,37 @@ namespace Resumetry.Application.Services
     /// </summary>
     public class StatusStateEngine
     {
+        private readonly static StatusEnum[] _interviewStatuses = [StatusEnum.Offer, StatusEnum.NoOffer, StatusEnum.Withdrawn];
+        private readonly static StatusEnum[] _screenStatuses = [StatusEnum.Interview];
+        private readonly static StatusEnum[] _appliedStatuses = [StatusEnum.Rejected, StatusEnum.Screen];
+
         /// <summary>
         /// Expected flow of a job application:
         /// Applied -> Rejected, Screen
         /// Screen -> Interview
         /// Interview -> Offer, NoOffer, Withdrawn
         /// </summary>
-        /// <param name="currentStatuses">Collection of current statuses used on a Job Application</param>
+        /// <param name="statuses">Collection of current statuses used on a Job Application</param>
         /// <returns>Array of allowed status transitions based on the expected flow of a job application</returns>
-        public static StatusEnum[] AvailableStatuses(ICollection<StatusEnum> currentStatuses)
+        public static StatusEnum[] AvailableStatuses(ICollection<StatusEnum> statuses)
         {
-            if (currentStatuses is null || currentStatuses.Count == 0)
+            if (statuses is null || statuses.Count == 0)
             {
                 return [StatusEnum.Applied];
             }
 
             // Allowed status transitions based on the expected flow of a job application
-            if (currentStatuses.Contains(StatusEnum.Interview))
+            if (statuses.Contains(StatusEnum.Interview) && !statuses.Intersect(_interviewStatuses).Any())
             {
-                return [StatusEnum.Offer, StatusEnum.NoOffer, StatusEnum.Withdrawn];
+                return [.. _interviewStatuses];
             }
-            else if (currentStatuses.Contains(StatusEnum.Screen))
+            else if (statuses.Contains(StatusEnum.Screen) && !statuses.Intersect(_screenStatuses).Any())
             {
-                return [StatusEnum.Interview];
+                return [.. _screenStatuses];
             }
-            else if (currentStatuses.Contains(StatusEnum.Applied))
+            else if (statuses.Contains(StatusEnum.Applied) && !statuses.Intersect(_appliedStatuses).Any())
             {
-                return [StatusEnum.Rejected, StatusEnum.Screen];
+                return [.. _appliedStatuses];
             }
             else
             {

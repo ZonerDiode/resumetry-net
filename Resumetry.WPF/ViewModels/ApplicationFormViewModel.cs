@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Resumetry.Application.DTOs;
 using Resumetry.Application.Interfaces;
+using Resumetry.Application.Services;
 using Resumetry.Domain.Enums;
 using Resumetry.WPF.Messages;
 using Resumetry.WPF.Services;
@@ -88,11 +89,41 @@ namespace Resumetry.ViewModels
         [ObservableProperty]
         private string _description = string.Empty;
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanAddStatus))]
         private void AddStatus()
         {
-            ApplicationStatuses.Insert(0, new ApplicationStatusViewModel { Occurred = DateTime.Now });
+            var currentStatuses = ApplicationStatuses.Select(s => s.Status);
+            var result = dialogService.ShowAddStatusDialog(currentStatuses);
+            if (result is null) return;
+
+            ApplicationStatuses.Insert(0, new ApplicationStatusViewModel
+            {
+                Occurred = result.Occurred,
+                Status = result.Status
+            });
             OnPropertyChanged(nameof(StatusCount));
+            AddStatusCommand.NotifyCanExecuteChanged();
+        }
+
+        private bool CanAddStatus()
+        {
+            var current = ApplicationStatuses.Select(s => s.Status).ToList();
+            return StatusStateEngine.AvailableStatuses(current).Length != 0;
+        }
+
+        /// <summary>
+        /// Inserts a default Applied status without showing the dialog.
+        /// Used to seed new or empty applications.
+        /// </summary>
+        public void EnsureAppliedStatus()
+        {
+            ApplicationStatuses.Insert(0, new ApplicationStatusViewModel
+            {
+                Occurred = DateTime.Now,
+                Status = StatusEnum.Applied
+            });
+            OnPropertyChanged(nameof(StatusCount));
+            AddStatusCommand.NotifyCanExecuteChanged();
         }
 
         [RelayCommand]
@@ -102,6 +133,7 @@ namespace Resumetry.ViewModels
             {
                 ApplicationStatuses.Remove(item);
                 OnPropertyChanged(nameof(StatusCount));
+                AddStatusCommand.NotifyCanExecuteChanged();
             }
         }
 
@@ -158,7 +190,7 @@ namespace Resumetry.ViewModels
             // Add one if empty
             if (ApplicationStatuses.Count == 0)
             {
-                AddStatus();
+                EnsureAppliedStatus();
             }
 
             // Load application events with their IDs
@@ -178,6 +210,7 @@ namespace Resumetry.ViewModels
             OnPropertyChanged(nameof(IsEditMode));
             OnPropertyChanged(nameof(WindowTitle));
             OnPropertyChanged(nameof(SaveButtonText));
+            AddStatusCommand.NotifyCanExecuteChanged();
         }
 
         public bool Validate()
