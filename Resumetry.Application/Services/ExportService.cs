@@ -1,5 +1,4 @@
 using Resumetry.Application.Interfaces;
-using Resumetry.Domain.Entities;
 using Resumetry.Domain.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;

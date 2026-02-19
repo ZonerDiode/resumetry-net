@@ -12,9 +12,16 @@ namespace Resumetry.Application.Services
     /// This is a one-time use service to help users transition their data, and is not intended for ongoing 
     /// use or to support future versions of the legacy format.
     /// </summary>
-    /// <param name="fileService"></param>
     public class LegacyImportService(IFileService fileService, IUnitOfWork unitOfWork) : IImportService
     {
+        /// <summary>
+        /// Imports job application data from a JSON file and saves it to the database.
+        /// </summary>
+        /// <param name="filePath">The path to the JSON file containing job application data. This file must exist for the import to succeed.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation if needed.</param>
+        /// <returns>The number of job applications successfully imported from the JSON file.</returns>
+        /// <exception cref="FileNotFoundException">Thrown if the specified <paramref name="filePath"/> does not exist.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the JSON content cannot be deserialized into job application data.</exception>
         public async Task<int> ImportFromJsonAsync(string filePath, CancellationToken cancellationToken = default)
         {
             if (!await fileService.FileExistsAsync(filePath))

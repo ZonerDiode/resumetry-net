@@ -19,6 +19,15 @@ namespace Resumetry.Application.Services
             Converters = { new JsonStringEnumConverter() }
         };
 
+        /// <summary>
+        /// Imports job applications from a JSON file and saves them to the database asynchronously.
+        /// </summary>
+        /// <param name="filePath">The path to the JSON file containing job application data. The file must exist and contain valid JSON
+        /// formatted as a list of job applications.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the import operation.</param>
+        /// <returns>The number of job applications successfully imported from the JSON file.</returns>
+        /// <exception cref="FileNotFoundException">Thrown if the specified <paramref name="filePath"/> does not exist.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the JSON content cannot be deserialized into job application objects.</exception>
         public async Task<int> ImportFromJsonAsync(string filePath, CancellationToken cancellationToken = default)
         {
             if (!await fileService.FileExistsAsync(filePath))
