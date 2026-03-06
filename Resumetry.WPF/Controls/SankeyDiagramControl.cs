@@ -122,10 +122,9 @@ namespace Resumetry.WPF.Controls
                 }
             }
 
-            // Define flow order to control stacking (largest flows first)
+            // Define flow fixed order to control stacking
             var orderedFlows = ReportData
                 .Where(d => d.Count > 0 && nodes.ContainsKey(d.From) && nodes.ContainsKey(d.To))
-                .OrderByDescending(d => d.Count)
                 .ToList();
 
             // Draw flows (behind nodes)

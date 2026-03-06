@@ -16,8 +16,8 @@ namespace Resumetry.Application.Services
         private readonly string APPLIED_RESPONDED = "APPLIED->RESPONDED";
         private readonly string RESPONDED_REJECTED = "RESPONDED->REJECTED";
         private readonly string RESPONDED_INTERVIEW = "RESPONDED->INTERVIEW";
-        private readonly string INTERVIEW_OFFER = "INTERVIEW->OFFER";
         private readonly string INTERVIEW_NOOFFER = "INTERVIEW->NO OFFER";
+        private readonly string INTERVIEW_OFFER = "INTERVIEW->OFFER";
 
         private readonly ImmutableList<StatusEnum> respondedStatuses =
         [
@@ -87,8 +87,8 @@ namespace Resumetry.Application.Services
                 }
             }
 
-            // Return List sorted by count in descending order
-            return [.. reportData.OrderByDescending(kv => kv.Value.Count).Select(kv => kv.Value)];
+            // Return List in fixed order
+            return [.. reportData.Select(kv => kv.Value)];
         }
 
         private Dictionary<string, SankeyReportData> InitializeReportData()
@@ -99,8 +99,8 @@ namespace Resumetry.Application.Services
                 [APPLIED_RESPONDED] = new SankeyReportData("Applied", "Responded"),
                 [RESPONDED_REJECTED] = new SankeyReportData("Responded", "Rejected"),
                 [RESPONDED_INTERVIEW] = new SankeyReportData("Responded", "Interview"),
-                [INTERVIEW_OFFER] = new SankeyReportData("Interview", "Offer"),
-                [INTERVIEW_NOOFFER] = new SankeyReportData("Interview", "No Offer")
+                [INTERVIEW_NOOFFER] = new SankeyReportData("Interview", "No Offer"),
+                [INTERVIEW_OFFER] = new SankeyReportData("Interview", "Offer")
             };
         }
     }
